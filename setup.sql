@@ -10,8 +10,8 @@ CREATE TABLE users (
     last_login TIMESTAMP, 
 
     friend_list INTEGER[], -- list of friends'  user_ids
-    goals INTEGER[],
-    group_study_sessions INTEGER[]
+    goals INTEGER[]
+    -- group_study_sessions INTEGER[]
 );
 
 
@@ -20,4 +20,17 @@ CREATE TABLE tasks (
     title VARCHAR (50) NOT NULL,
     due TIMESTAMP NOT NULL,
     creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE group_sessions (
+    group_id SERIAL PRIMARY KEY,
+    title VARCHAR (50) NOT NULL,
+    time TIMESTAMP NOT NULL,
+    -- members INTEGER[]
+);
+
+CREATE TABLE group_memberships (
+    group_id INTEGER REFERENCES group_sessions(group_id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    PRIMARY KEY (group_id, user_id)
 );
