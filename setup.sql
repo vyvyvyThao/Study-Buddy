@@ -26,6 +26,7 @@ CREATE TABLE group_sessions (
     group_id SERIAL PRIMARY KEY,
     title VARCHAR (50) NOT NULL,
     time TIMESTAMP NOT NULL,
+    meeting_url VARCHAR (500),
     -- members INTEGER[]
 );
 
