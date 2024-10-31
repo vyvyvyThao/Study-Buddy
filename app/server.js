@@ -2,6 +2,8 @@ const pg = require("pg");
 const express = require("express");
 const app = express();
 
+process.chdir(__dirname);
+
 const port = 3000;
 const hostname = "localhost";
 
