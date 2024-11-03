@@ -2,5 +2,11 @@
 An application used for studying
 
 ## Development Steps
-`npm run setup`  
-`npm run start`  
+
+### Pre-requirements
+- node.js installed  
+- postgreSQL installed
+### Commands
+`npm i` - install dependencies  
+`npm run setup` - setup database and tables  
+`npm run start` - start the node server  
