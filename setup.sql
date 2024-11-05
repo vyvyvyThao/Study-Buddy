@@ -19,6 +19,7 @@ CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     title VARCHAR (50) NOT NULL,
     due TIMESTAMP NOT NULL,
+    progress BOOLEAN,
     creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
 
