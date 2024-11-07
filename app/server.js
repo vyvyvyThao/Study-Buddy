@@ -74,6 +74,10 @@ app.post("/task/add", (req, res) => {
   res.send();
 });
 
+app.post("/register", (req, res) => {
+  let body = req.body;
+})
+
 app.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });
