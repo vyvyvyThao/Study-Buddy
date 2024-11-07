@@ -83,7 +83,41 @@ app.post("/task/add", (req, res) => {
 
 app.post("/register", (req, res) => {
   let body = req.body;
-})
+  //console.log(body);
+  if (
+    !body.hasOwnProperty("username") ||
+    !body.hasOwnProperty("email") ||
+    !body.hasOwnProperty("password") ||
+    !body.hasOwnProperty("timestamp")
+  ) {
+    return res.status(400).json({error: 'Bad Request'});
+  }
+  else {
+    if (
+      body["username"].length > 20 ||
+      body["password"].length > 20 ||
+      body["email"].length > 255
+    ) {
+      return res.status(400).json({error: 'Username, password must be below 20 characters'});
+    }
+  }
+
+  let {username, email, password, timestamp} = body;
+  console.log("IN SERVER: ", username, email, password, timestamp);
+  pool.query(
+    `INSERT INTO users(username, password, email, created_at)
+    VALUES($1, $2, $3, $4)
+    RETURNING *`,
+    [username, password, email, timestamp],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
 
 app.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);

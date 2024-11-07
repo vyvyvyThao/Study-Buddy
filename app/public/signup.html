@@ -52,6 +52,12 @@
     let button = document.getElementById("submit");
 
     button.addEventListener("click", () => {
+      let currentDate = new Date();
+      let timestampValue = currentDate.toISOString();
+      let dateAndTime = timestampValue.split('T');
+      let timeVal = dateAndTime[1].split('.');
+      let finalTimestampValue = dateAndTime[0] + " " + timeVal[0];
+      //console.log(finalTimestampValue);
       let usernameValue = usernameInput.value;
       let emailValue = emailInput.value;
       let passwordValue = passwordInput.value;
@@ -64,7 +70,8 @@
         body: JSON.stringify({
           username: usernameValue,
           email: emailValue,
-          password: passwordValue
+          password: passwordValue,
+          timestamp: finalTimestampValue
         })
       });
     })
