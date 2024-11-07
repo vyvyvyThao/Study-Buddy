@@ -1,6 +1,12 @@
 const pg = require("pg");
 const express = require("express");
+
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
+let server = http.createServer(app);
+let io = new Server(server);
 
 process.chdir(__dirname);
 
@@ -10,6 +16,7 @@ const hostname = "localhost";
 const env = require("../env.json");
 const Pool = pg.Pool;
 const pool = new Pool(env);
+
 pool.connect().then(function () {
   console.log(`Connected to database ${env.database}`);
 });
