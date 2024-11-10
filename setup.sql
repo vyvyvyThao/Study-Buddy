@@ -10,7 +10,7 @@ CREATE TABLE users (
     last_login TIMESTAMP, 
 
     friend_list INTEGER[], -- list of friends'  user_ids
-    goals INTEGER[]
+    tasks INTEGER[]
     -- group_study_sessions INTEGER[]
 );
 

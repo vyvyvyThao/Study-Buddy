@@ -8,12 +8,15 @@ const app = express();
 let server = http.createServer(app);
 let io = new Server(server);
 
+let currUser;     // for logged in user's data
+
 process.chdir(__dirname);
 
 const port = 3000;
 const hostname = "localhost";
 
 const env = require("../env.json");
+const { create } = require("domain");
 const Pool = pg.Pool;
 const pool = new Pool(env);
 
@@ -25,6 +28,53 @@ app.use(express.static("public"));
 app.use(express.json());
 
 /* -------------------------------------------------- */
+// TO-DO: Only response to this request when user is authenticated
+app.get("/notes", (req, res) => {
+  // currUser is request sender and is authenticated
+  pool.query(`SELECT * FROM notes WHERE user_id = $1`, [currUser.creatorId]).then(result => {
+    console.log(result.rows);
+    res.json({rows: result.rows});
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+})
+
+app.post("/notes/add", (req, res) => {
+  let body = req.body;
+  if (
+    !body.hasOwnProperty("content") ||
+    !body.hasOwnProperty("creatorId")
+  ) {
+    return res.status(404);
+  }
+
+  let creatorExist = true;
+  pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [creatorId])
+  .then(result => {
+    // console.log(result.rows);
+    if (result.rows.length == 0) {
+      creatorExist = false;
+      res.status(400).json({error: 'user does not exist'});
+    }
+  })
+    
+  pool.query(
+    `INSERT INTO notes(content, creator_id) 
+    VALUES($1, $2)
+    RETURNING *`,
+    [body.content, body.creatorId],
+  )
+  .then((result) => {
+    // console.log("Inserted:");
+    // console.log(result.rows);
+  })
+  .catch((error) => {
+    res.status(500);
+  });
+  res.send();
+})
 
 app.post("/task/add", (req, res) => {
   let body = req.body;
