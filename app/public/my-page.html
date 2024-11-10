@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Workspace</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>Study Buddy</h1>
+        <button id="toggleSidebarBtn">Widgets</button>
+    </header>
+
+    <div>
+
+      <div class="sidebar" id="sidebar">
+          <button onclick="createWidget('timer')">Add Timer</button>
+          <button onclick="createWidget('note')">Add Note</button>
+          <button onclick="createWidget('task-list')">Add Task List</button>
+          <button id="uploadImageBtn">Upload Background</button>
+          <button id="uploadMusicBtn">Upload Music</button>
+          <input type="file" id="imageUploader" accept="image/*" hidden>
+          <input type="file" id="musicUploader" accept="audio/*" hidden>
+      </div>
+
+      <main>
+          <div id="workspace"></div>
+      </main>
+
+    </div>
+
+    <audio id="backgroundMusic" controls loop hidden></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
