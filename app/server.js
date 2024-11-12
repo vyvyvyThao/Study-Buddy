@@ -169,6 +169,56 @@ app.post("/register", (req, res) => {
   })
 });
 
-app.listen(port, hostname, () => {
+
+function invalidChatId(chatId) {
+  return false;
+}
+
+app.get("/messages/:chatId", (req, res) => {
+  let { chatId } = req.params;
+
+  if (invalidChatId(chatId)) {
+    return res.status(404).send();
+  }
+
+  res.sendFile("public/messages/index.html", { root: __dirname });
+})
+
+io.on("connection", (socket) => {
+  console.log(`Socket ${socket.id} connected`);
+
+  let url = socket.handshake.headers.referer;
+  let pathParts = url.split("/");
+  let chatId = pathParts[pathParts.length - 1];
+  console.log(pathParts, chatId);
+
+  // room doesn't exist - this should never happen, but jic
+  if (invalidChatId(chatId)) {
+    return;
+  }
+  socket.join(chatId);
+
+  socket.on("disconnect", () => {
+    // disconnects are normal; close tab, refresh, browser freezes inactive tab, ...
+    // want to clean up global object, or else we'll have a memory leak
+    // WARNING: sockets don't always send disconnect events
+    // so you may want to periodically clean up your room object for old socket ids
+    console.log(`Socket ${socket.id} disconnected`);
+  });
+
+  socket.on("send message", ({ message }) => {
+    // we still have a reference to the roomId defined above
+    // b/c this function is defined inside the outer function
+    console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
+    console.log("Broadcasting message to other sockets");
+
+    // this would send the message to all other sockets
+    // but we want to only send it to other sockets in this room
+    // socket.broadcast.emit("message", message);
+    socket.to(chatId).emit("sent message", message); 
+  });
+});
+
+server.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });

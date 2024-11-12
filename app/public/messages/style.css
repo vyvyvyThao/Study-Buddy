@@ -2,6 +2,10 @@ body {
     margin: 0px
 }
 
+button {
+    border-radius: 10%;
+}
+
 #content {
     flex-direction: row;
     display: flex;
@@ -25,11 +29,21 @@ body {
 #messageInputBar {
     bottom: 0px;
     vertical-align: bottom;
-    padding: 0.25rem; 
     display: flex;
-    min-height:1rem;
+    min-height: 1.5rem;
     box-sizing: border-box; 
     backdrop-filter: blur(10px); 
+    width: auto;
+}
+#messageInput {
+    width: 80%;
+}
+
+#messages { 
+    margin: 0; 
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 
@@ -40,10 +54,10 @@ body {
     margin-left: 5px;
 }
 
-#messages { 
-    margin: 0; 
-    padding: 0;
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
+/* #messages > .my-message {
+    justify-content: flex-end;
+    border-right: 1;
+} */
+
+
 /* end message stuff */
