@@ -26,7 +26,8 @@
         </div>
         <div class="login-form">
           <div class="input-box">
-            <input id="usernameOrEmail" type="text" class="input-field" placeholder="Username or Email">
+            <!-- TODO: change this to accept username or Email -->
+            <input id="username" type="text" class="input-field" placeholder="Username">
             <i class="bx bx-user"></i>
           </div>
         </div>
@@ -42,6 +43,32 @@
   </div>
 
   <script>
+    let usernameInput = document.getElementById("username");
+    let passwordInput = document.getElementById("password");
+    let button = document.getElementById("submit");
+
+    button.addEventListener("click", () => {
+      let currentDate = new Date();
+      let timestampValue = currentDate.toISOString();
+      let dateAndTime = timestampValue.split('T');
+      let timeVal = dateAndTime[1].split('.');
+      let lastLoginValue = dateAndTime[0] + " " + timeVal[0];
+
+      let usernameValue = usernameInput.value;
+      let passwordValue = passwordInput.value;
+
+      fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: usernameValue,
+          password: passwordValue,
+          last_login: lastLoginValue
+        })
+      });
+    });
   </script>
 
 

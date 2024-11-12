@@ -4,7 +4,7 @@ CREATE DATABASE studybuddy;
 CREATE TABLE users (
 	user_id SERIAL PRIMARY KEY,
 	username VARCHAR (20) UNIQUE NOT NULL,
-    password VARCHAR (20) NOT NULL,
+    password VARCHAR (100) NOT NULL,
     email VARCHAR (255) UNIQUE NOT NULL,
     created_at TIMESTAMP NOT NULL,
     last_login TIMESTAMP, 
@@ -41,4 +41,10 @@ CREATE TABLE group_memberships (
     group_id INTEGER REFERENCES group_sessions(group_id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     PRIMARY KEY (group_id, user_id)
+);
+
+CREATE TABLE login_tokens (
+  id SERIAL PRIMARY KEY,
+  token VARCHAR (100) NOT NULL,
+  user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
