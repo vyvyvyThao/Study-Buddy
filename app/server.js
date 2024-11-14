@@ -15,6 +15,7 @@ let io = new Server(server);
 let currUser;     // for logged in user's data
 
 process.chdir(__dirname);
+const path = require("path");
 
 const port = 3000;
 const hostname = "localhost";
@@ -183,7 +184,7 @@ let cookieOptions = {
 };
 
 function makeToken() {
-  // TODO: increase the bytes for this, also increase the length to store password in db
+  // maybe increase the bytes for this, also increase the length to store password in db
   return crypto.randomBytes(18).toString("hex");
 }
 
@@ -281,11 +282,11 @@ app.post("/login", async (req, res) => {
     );
   } catch (error) {
     console.log("error");
-    return res.sendStatus(500).json({error: error});
+    res.sendStatus(500).json({error: error});
   }
 
   if (result.rows.length === 0) {
-    return res.sendStatus(400).json({error: "No user found"});
+    res.sendStatus(400).json({error: "No user found"});
   }
   let hash = result.rows[0].password;
   let user_id = result.rows[0].user_id;
@@ -296,12 +297,12 @@ app.post("/login", async (req, res) => {
     verifyPassword = await argon2.verify(hash, password);
   } catch (error) {
     console.log("FAILED PASSWORD VERIFICATION", error);
-    return res.sendStatus(500);
+    res.sendStatus(500);
   }
 
   if (!verifyPassword) {
     console.log("Password doesn't match");
-    return res.sendStatus(400);
+    res.sendStatus(400);
   }
 
   let token = makeToken();
@@ -313,12 +314,30 @@ app.post("/login", async (req, res) => {
     [token, user_id],
   ).catch((error) => {
     console.log(error);
-    return res.status(500).send();
+    res.status(500).send();
   });
-  // TODO: check this ahain
-  return res.cookie("token", token, cookieOptions).send();
+  // Updating current user with the logged in user
+  currUser = {};
+  currUser["creatorId"] = user_id;
+  currUser["username"] = username;
+
+  // TODO: check this again
+  res.cookie("token", token, cookieOptions);
+  console.log("redirect");
+  //res.sendFile("/public/my-page.html", {root: __dirname});
+  //res.status(200).redirect("/my-page/" + user_id);
+  res.json({"url": "/my-page.html"});
+
 
 });
+
+// app.get("/my-page/:user_id", (req, res) => {
+//   console.log("REDIRECTED!");
+//   let file = path.join(__dirname, '/public', 'my-page.html');
+//   console.log(file);
+//   res.sendFile(file);
+//   //return res.sendFile("/public/my-page.html", {root: __dirname});
+// })
 
 // to authorize the user
 let authorize = (req, res, next) => {
