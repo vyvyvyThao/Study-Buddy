@@ -157,15 +157,17 @@ app.post("friends/request", (req, res) => {
   })
 });
 
-app.post("friends/accept", (req, res) => {
-  let body = req.body;
+app.post("friends/update", (req, res) => {
+  let body = req.body;  // {sender_id, user_id, accept}
 
   // TO-DO: Validations!!!
 
+  if (req.body.accept) {
+    // add user with id sender_id to friends list of user with id user_id
+  }
+
   pool.query(
-    `INSERT INTO friend_list(sender_id, user_id)
-    VALUES($1, $2, $3)
-    RETURNING *`,
+    `DELETE FROM friend_requests WHERE sender_id = $1 AND user_id = $2`,
     [body.sender_id, body.user_id],
   )
   .then((result) => {
