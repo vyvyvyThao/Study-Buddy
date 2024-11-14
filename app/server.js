@@ -169,6 +169,23 @@ app.post("/register", (req, res) => {
   })
 });
 
+app.post("friends/request", (req, res) => {
+  let body = req.body;
+  pool.query(
+    `INSERT INTO friend_requests(sender_id, user_id)
+    VALUES($1, $2, $3)
+    RETURNING *`,
+    [body.sender_id, body.user_id],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
+
 app.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });

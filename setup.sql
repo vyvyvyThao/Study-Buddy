@@ -42,3 +42,9 @@ CREATE TABLE group_memberships (
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     PRIMARY KEY (group_id, user_id)
 );
+
+CREATE TABLE friend_requests (
+    id SERIAL PRIMARY KEY,
+    sender_id INTEGER,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
+);
