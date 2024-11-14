@@ -49,6 +49,12 @@ CREATE TABLE group_memberships (
     PRIMARY KEY (group_id, user_id)
 );
 
+CREATE TABLE login_tokens (
+  id SERIAL PRIMARY KEY,
+  token VARCHAR (100) NOT NULL,
+  user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 INSERT INTO users(user_id, username, password, email, created_at)
 VALUES (1, "test", "$argon2id$v=19$m=65536,t=3,p=4$sGSNXvZ1XOCwsE9Oo0hZmw$rLXVHw1A+mCip+Nzs2BYLfhMVh/l3KjiYY3zt0j35Jw", "test1@gmail.com", "2024-11-12 18:57:25");
 
