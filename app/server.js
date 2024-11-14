@@ -362,7 +362,33 @@ let authorize = (req, res, next) => {
 
 // TODO: logout
 // TODO: automatic user login after signup
-// TODO: give private access to only authorized users
+// TODO: put authorize middleware in other requests
+
+app.post("/logout", (req, res) => {
+  let { token } = req.cookies;
+
+  if (token === undefined) {
+    console.log("User already logged out");
+    return res.status(400).json({error: "Already logged out"});
+  }
+  
+  let tokens = pool.query(
+    `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
+  );
+
+  if(tokens.length === 0) {
+    console.log("Token doesn't exist");
+    return res.status(400).json({error: "Token doesn't exist"});
+  }
+
+  pool.query(
+    `DELETE FROM login_tokens WHERE token = $1`, [token],
+  );
+  console.log("deleted token");
+
+  return res.clearCookie("token", cookieOptions).send();
+
+})
 
 function invalidChatId(chatId) {
   return false;
