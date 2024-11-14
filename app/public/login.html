@@ -67,7 +67,12 @@
           password: passwordValue,
           last_login: lastLoginValue
         })
-      });
+      }).then((response) => {
+        return response.json();
+      }).then(body => {
+        console.log(body);
+        window.location = body.url;
+      })
     });
   </script>
 
