@@ -137,6 +137,46 @@ app.post("/task/add", (req, res) => {
   res.send();
 });
 
+app.post("friends/request", (req, res) => {
+  let body = req.body;
+
+  // TO-DO: Validations!!!
+
+  pool.query(
+    `INSERT INTO friend_requests(sender_id, user_id)
+    VALUES($1, $2, $3)
+    RETURNING *`,
+    [body.sender_id, body.user_id],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
+
+app.post("friends/accept", (req, res) => {
+  let body = req.body;
+
+  // TO-DO: Validations!!!
+
+  pool.query(
+    `INSERT INTO friend_list(sender_id, user_id)
+    VALUES($1, $2, $3)
+    RETURNING *`,
+    [body.sender_id, body.user_id],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
+
 let cookieOptions = {
   httpOnly: true,
   secure: true,
