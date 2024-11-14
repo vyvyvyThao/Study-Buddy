@@ -48,3 +48,9 @@ CREATE TABLE login_tokens (
   token VARCHAR (100) NOT NULL,
   user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+INSERT INTO users(user_id, username, password, email, created_at)
+VALUES (1, "test", "$argon2id$v=19$m=65536,t=3,p=4$sGSNXvZ1XOCwsE9Oo0hZmw$rLXVHw1A+mCip+Nzs2BYLfhMVh/l3KjiYY3zt0j35Jw", "test1@gmail.com", "2024-11-12 18:57:25");
+
+INSERT INTO login_tokens (token, user_id)
+VALUES ("7b1e2b512344749b813f9322bf5ed4b55dce", 1);
