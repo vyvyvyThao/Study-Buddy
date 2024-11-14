@@ -4,6 +4,10 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 
+let argon2 = require("argon2");
+let cookieParser = require("cookie-parser");
+let crypto = require("crypto");
+
 const app = express();
 let server = http.createServer(app);
 let io = new Server(server);
@@ -26,6 +30,7 @@ pool.connect().then(function () {
 
 app.use(express.static("public"));
 app.use(express.json());
+app.use(cookieParser());
 
 /* -------------------------------------------------- */
 // TO-DO: Only response to this request when user is authenticated
@@ -131,46 +136,11 @@ app.post("/task/add", (req, res) => {
   res.send();
 });
 
-app.post("/register", (req, res) => {
-  let body = req.body;
-  //console.log(body);
-  if (
-    !body.hasOwnProperty("username") ||
-    !body.hasOwnProperty("email") ||
-    !body.hasOwnProperty("password") ||
-    !body.hasOwnProperty("timestamp")
-  ) {
-    return res.status(400).json({error: 'Bad Request'});
-  }
-  else {
-    if (
-      body["username"].length > 20 ||
-      body["password"].length > 20 ||
-      body["email"].length > 255
-    ) {
-      return res.status(400).json({error: 'Username, password must be below 20 characters'});
-    }
-  }
-
-  let {username, email, password, timestamp} = body;
-  console.log("IN SERVER: ", username, email, password, timestamp);
-  pool.query(
-    `INSERT INTO users(username, password, email, created_at)
-    VALUES($1, $2, $3, $4)
-    RETURNING *`,
-    [username, password, email, timestamp],
-  )
-  .then((result) => {
-    console.log("Success");
-  })
-  .catch((error) => {
-    console.log(error);
-    return res.status(500).send();
-  })
-});
-
 app.post("friends/request", (req, res) => {
   let body = req.body;
+
+  // TO-DO: Validations!!!
+
   pool.query(
     `INSERT INTO friend_requests(sender_id, user_id)
     VALUES($1, $2, $3)
@@ -186,6 +156,242 @@ app.post("friends/request", (req, res) => {
   })
 });
 
-app.listen(port, hostname, () => {
+app.post("friends/accept", (req, res) => {
+  let body = req.body;
+
+  // TO-DO: Validations!!!
+
+  pool.query(
+    `INSERT INTO friend_list(sender_id, user_id)
+    VALUES($1, $2, $3)
+    RETURNING *`,
+    [body.sender_id, body.user_id],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
+
+let cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "strict",
+};
+
+function makeToken() {
+  // TODO: increase the bytes for this, also increase the length to store password in db
+  return crypto.randomBytes(18).toString("hex");
+}
+
+function validateLoginCredentials(body) {
+  // TODO: move validation here
+  return true;
+}
+
+app.post("/register", async (req, res) => {
+  let body = req.body;
+  //console.log(body);
+  // TODO: Put the below validation in the function above
+  if (
+    !body.hasOwnProperty("username") ||
+    !body.hasOwnProperty("email") ||
+    !body.hasOwnProperty("password") ||
+    !body.hasOwnProperty("timestamp")
+  ) {
+    return res.status(400).json({error: 'Bad Request'});
+  }
+  else {
+    if (
+      body["username"].length < 1 || body["username"].length > 20 ||
+      body["password"].length < 7 || body["password"].length > 20 ||
+      body["email"].length < 11 || body["email"].length > 255
+    ) {
+      // TODO: add more detail to the error message
+      return res.status(400).json({error: 'Username, password must be below 20 characters'});
+    }
+  }
+
+  let {username, email, password, timestamp} = body;
+  console.log("IN SERVER: ", username, email, password, timestamp);
+  
+  pool.query(`SELECT username FROM users WHERE username = $1`, [username])
+    .then(result => {
+      // console.log(result.rows);
+      if (result.rows.length !== 0) {
+        return res.status(400).json({error: 'username already exists'});
+      }
+    });
+
+  let hash;
+  try {
+    hash = await argon2.hash(password);
+    console.log("HASH: ", hash);
+  } catch (error) {
+    console.log("hash failed", error);
+    return res.sendStatus(500);
+  }    
+  console.log("HASH: ", hash);
+
+  await pool.query(
+    `INSERT INTO users(username, password, email, created_at)
+    VALUES($1, $2, $3, $4)
+    RETURNING *`,
+    [username, hash, email, timestamp],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  });
+  // TODO: change the result body (look into automatic logging in after sign up)
+  return res.sendStatus(200).send();
+});
+
+app.post("/login", async (req, res) => {
+  let body = req.body;
+  if (
+    !body.hasOwnProperty("username") ||
+    !body.hasOwnProperty("password") ||
+    !body.hasOwnProperty("last_login")
+  ) {
+    return res.status(400).json({error: 'Bad Request'});
+  }
+  else {
+    if (
+      body["username"].length < 1 || body["username"].length > 20 ||
+      body["password"].length < 7 || body["password"].length > 20
+    ) {
+      // TODO: add more detail to the error message
+      return res.status(400).json({error: 'Username, password must be below 20 characters'});
+    }
+  }
+  let {username, password, last_login} = body;
+  console.log("IN SERVEr, login: ", username, password, last_login);
+
+  let result;
+  try {
+    result = await pool.query(
+      `SELECT * FROM users WHERE username = $1`, [username],
+    );
+  } catch (error) {
+    console.log("error");
+    return res.sendStatus(500).json({error: error});
+  }
+
+  if (result.rows.length === 0) {
+    return res.sendStatus(400).json({error: "No user found"});
+  }
+  let hash = result.rows[0].password;
+  let user_id = result.rows[0].user_id;
+  console.log(username, password, hash);
+
+  let verifyPassword;
+  try {
+    verifyPassword = await argon2.verify(hash, password);
+  } catch (error) {
+    console.log("FAILED PASSWORD VERIFICATION", error);
+    return res.sendStatus(500);
+  }
+
+  if (!verifyPassword) {
+    console.log("Password doesn't match");
+    return res.sendStatus(400);
+  }
+
+  let token = makeToken();
+  console.log("Generated token", token);
+  pool.query(
+    `INSERT INTO login_tokens(token, user_id)
+    VALUES($1, $2)
+    RETURNING *`,
+    [token, user_id],
+  ).catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  });
+  // TODO: check this ahain
+  return res.cookie("token", token, cookieOptions).send();
+
+});
+
+// to authorize the user
+let authorize = (req, res, next) => {
+  let { token } = req.cookies;
+  console.log(token);
+  let tokens;
+  try {
+    tokens = pool.query(
+      `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
+    );
+  } catch (error) {
+    console.log("ERROR", error);
+  }
+
+  if (token === undefined || tokens.length === 0) {
+    return res.sendStatus(403); // TODO
+  }
+  next();
+};
+
+// TODO: logout
+// TODO: automatic user login after signup
+// TODO: give private access to only authorized users
+
+function invalidChatId(chatId) {
+  return false;
+}
+
+app.get("/messages/:chatId", (req, res) => {
+  let { chatId } = req.params;
+
+  if (invalidChatId(chatId)) {
+    return res.status(404).send();
+  }
+
+  res.sendFile("public/messages/index.html", { root: __dirname });
+})
+
+io.on("connection", (socket) => {
+  console.log(`Socket ${socket.id} connected`);
+
+  let url = socket.handshake.headers.referer;
+  let pathParts = url.split("/");
+  let chatId = pathParts[pathParts.length - 1];
+  console.log(pathParts, chatId);
+
+  // room doesn't exist - this should never happen, but jic
+  if (invalidChatId(chatId)) {
+    return;
+  }
+  socket.join(chatId);
+
+  socket.on("disconnect", () => {
+    // disconnects are normal; close tab, refresh, browser freezes inactive tab, ...
+    // want to clean up global object, or else we'll have a memory leak
+    // WARNING: sockets don't always send disconnect events
+    // so you may want to periodically clean up your room object for old socket ids
+    console.log(`Socket ${socket.id} disconnected`);
+  });
+
+  socket.on("send message", ({ message }) => {
+    // we still have a reference to the roomId defined above
+    // b/c this function is defined inside the outer function
+    console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
+    console.log("Broadcasting message to other sockets");
+
+    // this would send the message to all other sockets
+    // but we want to only send it to other sockets in this room
+    // socket.broadcast.emit("message", message);
+    socket.to(chatId).emit("sent message", message); 
+  });
+});
+
+server.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });
