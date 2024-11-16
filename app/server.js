@@ -22,8 +22,11 @@ const hostname = "localhost";
 
 const env = require("../env.json");
 const { create } = require("domain");
+const { error } = require("console");
 const Pool = pg.Pool;
 const pool = new Pool(env);
+
+
 
 pool.connect().then(function () {
   console.log(`Connected to database ${env.database}`);
@@ -32,6 +35,14 @@ pool.connect().then(function () {
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
+
+
+app.use("*", (req, res, next) => {
+  //middleware for debugging
+  console.log({ url: req.originalUrl, body: req.body });
+  next();
+});
+
 
 /* -------------------------------------------------- */
 // TO-DO: Only response to this request when user is authenticated
@@ -401,8 +412,24 @@ app.get("/messages/:chatId", (req, res) => {
     return res.status(404).send();
   }
 
-  res.sendFile("public/messages/index.html", { root: __dirname });
+  return res.sendFile("public/messages/index.html", { root: __dirname });
 })
+
+app.get("/chat-messages", (req, res) => {
+  let { chatId } = req.query;
+  if (invalidChatId(chatId)) {
+    return;
+  }
+  
+  pool.query(
+    "SELECT * FROM chat_messages WHERE chat_id = $1 ORDER BY sent_date", 
+    [chatId]
+  ).then((result) => {
+    return res.status(200).json({messages: result.rows})
+  }).catch((error) => {
+    console.log(error)
+  })
+}) 
 
 io.on("connection", (socket) => {
   console.log(`Socket ${socket.id} connected`);
@@ -417,18 +444,20 @@ io.on("connection", (socket) => {
   socket.join(chatId);
 
   socket.on("disconnect", () => {
-    // disconnects are normal; close tab, refresh, browser freezes inactive tab, ...
-    // want to clean up global object, or else we'll have a memory leak
-    // WARNING: sockets don't always send disconnect events
-    // so you may want to periodically clean up your room object for old socket ids
     console.log(`Socket ${socket.id} disconnected`);
   });
 
   socket.on("send message", ({ message }) => {
     console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
     console.log("Broadcasting message to other sockets");
-    pool.query("INSERT INTO chat_message(chat_id, chat_message) VALUES($1 $2) RETURNING *", [$chatId, message])
-    socket.to(chatId).emit("sent message", message); 
+    pool.query(
+      "INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES($1, $2, $3) RETURNING *",
+      [chatId, message, new Date(new Date().toISOString())]
+    ).then((result) => {
+    }).catch(error => {
+      console.log(error);
+    })
+    socket.to(chatId).emit("sent message", message);
   });
 });
 
