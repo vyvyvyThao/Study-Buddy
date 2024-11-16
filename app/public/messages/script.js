@@ -30,8 +30,5 @@ messageInput.addEventListener("keypress", (event) => {
 });
 
 socket.on('sent message', function(message) {
-  // let item = makeMessageHTML(msg.username, msg.message);
-  // messages.appendChild(item);
-  // messages.scrollTo(0, messages.scrollHeight);
-  appendMessage(message)
+  appendMessage(message);
 });

@@ -410,9 +410,7 @@ io.on("connection", (socket) => {
   let url = socket.handshake.headers.referer;
   let pathParts = url.split("/");
   let chatId = pathParts[pathParts.length - 1];
-  console.log(pathParts, chatId);
 
-  // room doesn't exist - this should never happen, but jic
   if (invalidChatId(chatId)) {
     return;
   }
@@ -427,14 +425,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send message", ({ message }) => {
-    // we still have a reference to the roomId defined above
-    // b/c this function is defined inside the outer function
     console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
     console.log("Broadcasting message to other sockets");
-
-    // this would send the message to all other sockets
-    // but we want to only send it to other sockets in this room
-    // socket.broadcast.emit("message", message);
+    pool.query("INSERT INTO chat_message(chat_id, chat_message) VALUES($1 $2) RETURNING *", [$chatId, message])
     socket.to(chatId).emit("sent message", message); 
   });
 });

@@ -1,1 +1,13 @@
-{"scripts":{"start":"cd app && node server.js","setup":"psql -U postgres -f setup.sql"},"dependencies":{"argon2":"^0.41.1","cookie-parser":"^1.4.7","express":"^4.21.1","pg":"^8.13.1","socket.io":"^4.7.5"}}
+{
+    "scripts": {
+        "start": "cd app && node server.js",
+        "setup": "psql -U postgres -f setup.sql"
+    },
+    "dependencies": {
+        "argon2": "^0.41.1",
+        "cookie-parser": "^1.4.7",
+        "express": "^4.21.1",
+        "pg": "^8.13.1",
+        "socket.io": "^4.7.5"
+    }
+}
