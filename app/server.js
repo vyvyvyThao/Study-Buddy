@@ -284,11 +284,11 @@ app.post("/login", async (req, res) => {
     );
   } catch (error) {
     console.log("error");
-    res.sendStatus(500).json({error: error});
+    return res.sendStatus(500).json({error: error});
   }
 
   if (result.rows.length === 0) {
-    res.sendStatus(400).json({error: "No user found"});
+    return res.sendStatus(400).json({error: "No user found"});
   }
   let hash = result.rows[0].password;
   let user_id = result.rows[0].user_id;
@@ -299,12 +299,12 @@ app.post("/login", async (req, res) => {
     verifyPassword = await argon2.verify(hash, password);
   } catch (error) {
     console.log("FAILED PASSWORD VERIFICATION", error);
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 
   if (!verifyPassword) {
     console.log("Password doesn't match");
-    res.sendStatus(400);
+    return res.sendStatus(400);
   }
 
   let token = makeToken();
@@ -316,7 +316,7 @@ app.post("/login", async (req, res) => {
     [token, user_id],
   ).catch((error) => {
     console.log(error);
-    res.status(500).send();
+    return res.status(500).send();
   });
   // Updating current user with the logged in user
   currUser = {};
@@ -328,7 +328,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  res.json({"url": "/my-page.html"});
+  return res.json({"url": "/my-page.html"});
 
 
 });
