@@ -92,6 +92,17 @@ app.post("/notes/add", (req, res) => {
   res.send();
 })
 
+app.get("/tasks", (req, res) => {
+  pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [currUser.user_id]).then(result => {
+    console.log(result.rows);
+    res.json({rows: result.rows});
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+})
+
 app.post("/task/add", (req, res) => {
   let body = req.body;
   if (

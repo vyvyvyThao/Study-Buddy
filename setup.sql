@@ -28,15 +28,13 @@ CREATE TABLE tasks (
     title VARCHAR (50) NOT NULL,
     due TIMESTAMP NOT NULL,
     progress BOOLEAN,
-    creator_id INTEGER,
-    CONSTRAINT fk_tasks_user FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
+    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
     content VARCHAR (1000) NOT NULL,
-    creator_id INTEGER,
-    CONSTRAINT fk_notes_user FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
+    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE group_sessions (
@@ -44,7 +42,6 @@ CREATE TABLE group_sessions (
     title VARCHAR (50) NOT NULL,
     time TIMESTAMP NOT NULL,
     meeting_url VARCHAR (500)
-    -- members INTEGER[]
 );
 
 CREATE TABLE group_memberships (
