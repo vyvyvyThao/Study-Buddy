@@ -22,8 +22,11 @@ const hostname = "localhost";
 
 const env = require("../env.json");
 const { create } = require("domain");
+const { error } = require("console");
 const Pool = pg.Pool;
 const pool = new Pool(env);
+
+
 
 pool.connect().then(function () {
   console.log(`Connected to database ${env.database}`);
@@ -33,11 +36,18 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
 
+
+app.use("*", (req, res, next) => {
+  //middleware for debugging
+  console.log({ url: req.originalUrl, body: req.body });
+  next();
+});
+
+
 /* -------------------------------------------------- */
-// TO-DO: Only response to this request when user is authenticated
+// TO-DO: Only response to requests if user is authenticated
 app.get("/notes", (req, res) => {
-  // currUser is request sender and is authenticated
-  pool.query(`SELECT * FROM notes WHERE user_id = $1`, [currUser.creatorId]).then(result => {
+  pool.query(`SELECT * FROM notes WHERE creator_id = $1`, [currUser.user_id]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
   })
@@ -80,6 +90,17 @@ app.post("/notes/add", (req, res) => {
     res.status(500);
   });
   res.send();
+})
+
+app.get("/tasks", (req, res) => {
+  pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [currUser.user_id]).then(result => {
+    console.log(result.rows);
+    res.json({rows: result.rows});
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
 })
 
 app.post("/task/add", (req, res) => {
@@ -135,6 +156,128 @@ app.post("/task/add", (req, res) => {
     });
   }
   res.send();
+});
+
+app.post("friends/request", (req, res) => {
+  let body = req.body; // {user_id}
+
+  if (currUser.user_id == body.user_id) {
+    res.status(400).json({error: "Cannot send request to yourself."});
+  }
+
+  pool.query(`SELECT * FROM friend_requests WHERE sender_id = $1 AND user_id = $2`, [currUser.user_id, body.user_id]).then(result => {
+    if (length(result.rows) != 0) {
+      res.status(400).json({error: "Request has already been sent."});
+    }
+    res.json({rows: result.rows});
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
+
+  let user1_id = currUser.user_id;
+  let user2_id = body.user_id
+  if (currUser.user_id > body.user_id) {
+    user1_id = body.user_id;
+    user2_id = currUser.user_id;
+  }
+
+  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id]).then(result => {
+    if (length(result.rows) != 0) {
+      res.status(400).json({error: "2 users are already friends."});
+    }
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
+
+  pool.query(
+    `INSERT INTO friend_requests(sender_id, user_id)
+    VALUES($1, $2, $3)
+    RETURNING *`,
+    [body.sender_id, body.user_id],
+  )
+  .then((result) => {
+    console.log("Success");
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+});
+
+app.post("friends/update", (req, res) => {
+  let body = req.body;  // {user_id, accept}
+
+  if (currUser.user_id == body.user_id) {
+    res.status(400).json({error: "Cannot make yourself a friends."});
+  }
+
+  let user1_id = currUser.user_id;
+  let user2_id = body.user_id
+
+  if (currUser.user_id > body.user_id) {
+    user1_id = body.user_id;
+    user2_id = currUser.user_id;
+  }
+
+  let friendshipList;
+
+  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
+  .then(result => {
+    friendshipList = result.rows;
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
+
+  if (length(friendshipList) != 0) {
+    // accepting friend request and friendship already exists => error
+    if (req.body.accept) {
+      res.status(400).json({error: "2 users are already friends."});
+    
+    // unfriend
+    } else {
+      pool.query(
+        `DELETE FROM friendships WHERE user1_id = $1 AND user2_id = $2`,
+        [user1_id, user2_id]
+      )
+      .then((result) => {
+        res.status(204);
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(500).send();
+      })
+    }
+  }
+
+  // accept friend request if friendship does not exist
+  if (req.body.accept) {
+    pool.query(
+      `INSERT INTO friendships(user1_id, user2_id)
+      VALUES($1, $2)
+      RETURNING *`,
+      [user1_id, user2_id],
+    )
+    .then((result) => {
+      res.status(201);
+    })
+    .catch((error) => {
+      console.log(error);
+      return res.status(500).send();
+    })
+  }
+
+  // remove friend request
+  pool.query(
+    `DELETE FROM friend_requests WHERE sender_id = $1 AND user_id = $2`,
+    [body.sender_id, body.user_id],
+  )
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
 });
 
 let cookieOptions = {
@@ -242,11 +385,11 @@ app.post("/login", async (req, res) => {
     );
   } catch (error) {
     console.log("error");
-    res.sendStatus(500).json({error: error});
+    return res.sendStatus(500).json({error: error});
   }
 
   if (result.rows.length === 0) {
-    res.sendStatus(400).json({error: "No user found"});
+    return res.sendStatus(400).json({error: "No user found"});
   }
   let hash = result.rows[0].password;
   let user_id = result.rows[0].user_id;
@@ -257,12 +400,12 @@ app.post("/login", async (req, res) => {
     verifyPassword = await argon2.verify(hash, password);
   } catch (error) {
     console.log("FAILED PASSWORD VERIFICATION", error);
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 
   if (!verifyPassword) {
     console.log("Password doesn't match");
-    res.sendStatus(400);
+    return res.sendStatus(400);
   }
 
   let token = makeToken();
@@ -274,7 +417,7 @@ app.post("/login", async (req, res) => {
     [token, user_id],
   ).catch((error) => {
     console.log(error);
-    res.status(500).send();
+    return res.status(500).send();
   });
   // Updating current user with the logged in user
   currUser = {};
@@ -286,7 +429,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  res.json({"url": "/my-page.html"});
+  return res.json({"url": "/my-page.html"});
 
 
 });
@@ -320,7 +463,33 @@ let authorize = (req, res, next) => {
 
 // TODO: logout
 // TODO: automatic user login after signup
-// TODO: give private access to only authorized users
+// TODO: put authorize middleware in other requests
+
+app.post("/logout", (req, res) => {
+  let { token } = req.cookies;
+
+  if (token === undefined) {
+    console.log("User already logged out");
+    return res.status(400).json({error: "Already logged out"});
+  }
+  
+  let tokens = pool.query(
+    `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
+  );
+
+  if(tokens.length === 0) {
+    console.log("Token doesn't exist");
+    return res.status(400).json({error: "Token doesn't exist"});
+  }
+
+  pool.query(
+    `DELETE FROM login_tokens WHERE token = $1`, [token],
+  );
+  console.log("deleted token");
+
+  return res.clearCookie("token", cookieOptions).send();
+
+})
 
 function invalidChatId(chatId) {
   return false;
@@ -333,8 +502,24 @@ app.get("/messages/:chatId", (req, res) => {
     return res.status(404).send();
   }
 
-  res.sendFile("public/messages/index.html", { root: __dirname });
+  return res.sendFile("public/messages/index.html", { root: __dirname });
 })
+
+app.get("/chat-messages", (req, res) => {
+  let { chatId } = req.query;
+  if (invalidChatId(chatId)) {
+    return;
+  }
+  
+  pool.query(
+    "SELECT * FROM chat_messages WHERE chat_id = $1 ORDER BY sent_date", 
+    [chatId]
+  ).then((result) => {
+    return res.status(200).json({messages: result.rows})
+  }).catch((error) => {
+    console.log(error)
+  })
+}) 
 
 io.on("connection", (socket) => {
   console.log(`Socket ${socket.id} connected`);
@@ -342,32 +527,27 @@ io.on("connection", (socket) => {
   let url = socket.handshake.headers.referer;
   let pathParts = url.split("/");
   let chatId = pathParts[pathParts.length - 1];
-  console.log(pathParts, chatId);
 
-  // room doesn't exist - this should never happen, but jic
   if (invalidChatId(chatId)) {
     return;
   }
   socket.join(chatId);
 
   socket.on("disconnect", () => {
-    // disconnects are normal; close tab, refresh, browser freezes inactive tab, ...
-    // want to clean up global object, or else we'll have a memory leak
-    // WARNING: sockets don't always send disconnect events
-    // so you may want to periodically clean up your room object for old socket ids
     console.log(`Socket ${socket.id} disconnected`);
   });
 
   socket.on("send message", ({ message }) => {
-    // we still have a reference to the roomId defined above
-    // b/c this function is defined inside the outer function
     console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
     console.log("Broadcasting message to other sockets");
-
-    // this would send the message to all other sockets
-    // but we want to only send it to other sockets in this room
-    // socket.broadcast.emit("message", message);
-    socket.to(chatId).emit("sent message", message); 
+    pool.query(
+      "INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES($1, $2, $3) RETURNING *",
+      [chatId, message, new Date(new Date().toISOString())]
+    ).then((result) => {
+    }).catch(error => {
+      console.log(error);
+    })
+    socket.to(chatId).emit("sent message", message);
   });
 });
 

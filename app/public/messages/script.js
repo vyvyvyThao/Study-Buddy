@@ -3,13 +3,23 @@ let socket = io();
 let messagesDiv = document.getElementById("messages");
 let messageInput = document.getElementById("messageInput");
 let sendMessageButton = document.getElementById("sendMessage");
+let chatIdString = window.location.pathname.split("/").pop();
+
+
+fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
+  return response.json();
+}).then((body) => {
+  for( let messageObject of body.messages) {
+    appendMessage(messageObject.chat_message)
+  }
+})
 
 sendMessageButton.addEventListener("click", () => {
   let messageText = messageInput.value;
   if (messageText === "") {
     return;
   }
-  socket.emit("send message", {message: messageText});
+  socket.emit("send message", { message: messageText });
   appendMessage(messageText);
   messageInput.value = "";
 });
@@ -29,9 +39,6 @@ messageInput.addEventListener("keypress", (event) => {
   }
 });
 
-socket.on('sent message', function(message) {
-  // let item = makeMessageHTML(msg.username, msg.message);
-  // messages.appendChild(item);
-  // messages.scrollTo(0, messages.scrollHeight);
-  appendMessage(message)
+socket.on('sent message', function (message) {
+  appendMessage(message);
 });
