@@ -45,10 +45,9 @@ app.use("*", (req, res, next) => {
 
 
 /* -------------------------------------------------- */
-// TO-DO: Only response to this request when user is authenticated
+// TO-DO: Only response to requests if user is authenticated
 app.get("/notes", (req, res) => {
-  // currUser is request sender and is authenticated
-  pool.query(`SELECT * FROM notes WHERE user_id = $1`, [currUser.creatorId]).then(result => {
+  pool.query(`SELECT * FROM notes WHERE creator_id = $1`, [currUser.user_id]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
   })
@@ -149,9 +148,37 @@ app.post("/task/add", (req, res) => {
 });
 
 app.post("friends/request", (req, res) => {
-  let body = req.body;
+  let body = req.body; // {user_id}
 
-  // TO-DO: Validations!!!
+  if (currUser.user_id == body.user_id) {
+    res.status(400).json({error: "Cannot send request to yourself."});
+  }
+
+  pool.query(`SELECT * FROM friend_requests WHERE sender_id = $1 AND user_id = $2`, [currUser.user_id, body.user_id]).then(result => {
+    if (length(result.rows) != 0) {
+      res.status(400).json({error: "Request has already been sent."});
+    }
+    res.json({rows: result.rows});
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
+
+  let user1_id = currUser.user_id;
+  let user2_id = body.user_id
+  if (currUser.user_id > body.user_id) {
+    user1_id = body.user_id;
+    user2_id = currUser.user_id;
+  }
+
+  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id]).then(result => {
+    if (length(result.rows) != 0) {
+      res.status(400).json({error: "2 users are already friends."});
+    }
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
 
   pool.query(
     `INSERT INTO friend_requests(sender_id, user_id)
@@ -169,21 +196,73 @@ app.post("friends/request", (req, res) => {
 });
 
 app.post("friends/update", (req, res) => {
-  let body = req.body;  // {sender_id, user_id, accept}
+  let body = req.body;  // {user_id, accept}
 
-  // TO-DO: Validations!!!
-
-  if (req.body.accept) {
-    // add user with id sender_id to friends list of user with id user_id
+  if (currUser.user_id == body.user_id) {
+    res.status(400).json({error: "Cannot make yourself a friends."});
   }
 
+  let user1_id = currUser.user_id;
+  let user2_id = body.user_id
+
+  if (currUser.user_id > body.user_id) {
+    user1_id = body.user_id;
+    user2_id = currUser.user_id;
+  }
+
+  let friendshipList;
+
+  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
+  .then(result => {
+    friendshipList = result.rows;
+  })
+  .catch(error => {
+    console.error("error:", error);
+  });  
+
+  if (length(friendshipList) != 0) {
+    // accepting friend request and friendship already exists => error
+    if (req.body.accept) {
+      res.status(400).json({error: "2 users are already friends."});
+    
+    // unfriend
+    } else {
+      pool.query(
+        `DELETE FROM friendships WHERE user1_id = $1 AND user2_id = $2`,
+        [user1_id, user2_id]
+      )
+      .then((result) => {
+        res.status(204);
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(500).send();
+      })
+    }
+  }
+
+  // accept friend request if friendship does not exist
+  if (req.body.accept) {
+    pool.query(
+      `INSERT INTO friendships(user1_id, user2_id)
+      VALUES($1, $2)
+      RETURNING *`,
+      [user1_id, user2_id],
+    )
+    .then((result) => {
+      res.status(201);
+    })
+    .catch((error) => {
+      console.log(error);
+      return res.status(500).send();
+    })
+  }
+
+  // remove friend request
   pool.query(
     `DELETE FROM friend_requests WHERE sender_id = $1 AND user_id = $2`,
     [body.sender_id, body.user_id],
   )
-  .then((result) => {
-    console.log("Success");
-  })
   .catch((error) => {
     console.log(error);
     return res.status(500).send();

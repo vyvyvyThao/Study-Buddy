@@ -8,10 +8,18 @@ CREATE TABLE users (
     email VARCHAR (255) UNIQUE NOT NULL,
     created_at TIMESTAMP NOT NULL,
     last_login TIMESTAMP, 
+);
 
-    friend_list INTEGER[], -- list of friends'  user_ids
-    tasks INTEGER[]
-    -- group_study_sessions INTEGER[]
+CREATE TABLE friend_requests (
+    request_id SERIAL PRIMARY KEY,
+    sender_id INTEGER REFERENCES users(user_id),
+    user_id INTEGER REFERENCES users(user_id)
+);
+
+CREATE TABLE friendships (
+    user1_id INTEGER REFERENCES group_sessions(group_id) ON DELETE CASCADE,
+    user2_id INTEGER REFERENCES users(user_id),
+    PRIMARY KEY (group_id, user_id)
 );
 
 
@@ -39,15 +47,9 @@ CREATE TABLE group_sessions (
     -- members INTEGER[]
 );
 
-CREATE TABLE friend_requests (
-    request_id SERIAL PRIMARY KEY,
-    sender_id INTEGER REFERENCES users(user_id),
-    user_id INTEGER REFERENCES users(user_id)
-);
-
 CREATE TABLE group_memberships (
     group_id INTEGER REFERENCES group_sessions(group_id) ON DELETE CASCADE,
-    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(user_id),
     PRIMARY KEY (group_id, user_id)
 );
 
