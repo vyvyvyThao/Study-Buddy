@@ -27,13 +27,13 @@ CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
     content VARCHAR (1000) NOT NULL,
     creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE group_sessions (
     group_id SERIAL PRIMARY KEY,
     title VARCHAR (50) NOT NULL,
     time TIMESTAMP NOT NULL,
-    meeting_url VARCHAR (500),
+    meeting_url VARCHAR (500)
     -- members INTEGER[]
 );
 

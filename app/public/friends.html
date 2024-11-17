@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends</title>
+    <link rel="stylesheet" href="friends.css">
+</head>
+<body>
+    <div id="navbar">
+        <span>Study Buddy</span>
+        <a href="#">My Page</a>
+        <a href="#">Study Sets</a>
+        <a href="#">Friends</a>
+        <a href="#">Sign Out</a>
+    </div>
+
+    <div id="main-content">
+        <div id="left-section">
+            <div class="user-profile">
+                <img id="profile-picture" src="profile.png" alt="Profile Picture">
+                <p id="username">Username</p>
+            </div>
+            
+            <div class="friend-list">
+                <h3>Friends</h3>
+                <ul id="friends-list">
+                </ul>
+            </div>
+            
+            <div class="friend-requests">
+                <h3>Friend Requests</h3>
+                <ul id="friend-requests">
+                </ul>
+            </div>
+
+            <div class="add-friend">
+                <h3>Send Friend Request</h3>
+                <input type="text" id="friend-username" placeholder="Enter username">
+                <button onclick="sendFriendRequest()">Send Request</button>
+            </div>
+        </div>
+
+        <div id="right-section">
+            <h3>Chat Room</h3>
+            <div id="chat-box">
+            </div>
+            <div id="chat-input">
+                <input type="text" id="chat-message" placeholder="Type a message">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="friends.js"></script>
+</body>
+</html>
