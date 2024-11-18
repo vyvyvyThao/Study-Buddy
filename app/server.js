@@ -354,7 +354,7 @@ app.post("/register", async (req, res) => {
     return res.status(500).send();
   });
   // TODO: change the result body (look into automatic logging in after sign up)
-  return res.sendStatus(200).send();
+  return res.sendStatus(200);
 });
 
 app.post("/login", async (req, res) => {
@@ -385,11 +385,11 @@ app.post("/login", async (req, res) => {
     );
   } catch (error) {
     console.log("error");
-    return res.sendStatus(500).json({error: error});
+    return res.status(500).json({error: error});
   }
 
   if (result.rows.length === 0) {
-    return res.sendStatus(400).json({error: "No user found"});
+    return res.status(400).json({error: "No user found"});
   }
   let hash = result.rows[0].password;
   let user_id = result.rows[0].user_id;
