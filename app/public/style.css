@@ -6,7 +6,7 @@ body{
 	align-items: center;
 	min-height: 100vh;
 	font-family: 'Jost', sans-serif;
-  background-image: url("../public/img/cafe_bg.jpeg");
+  background-image: url("img/cafe_bg.jpeg");
   background-repeat: no-repeat;
   background-position: center;
   background-attachment: fixed;
