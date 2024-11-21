@@ -173,6 +173,8 @@ app.post("/login", async (req, res) => {
     return res.sendStatus(400);
   }
 
+  //TODO: if already logged in, do not generate another token before the earlier one expires
+  // and set an expiry for it
   let token = makeToken();
   console.log("Generated token", token);
   pool.query(

@@ -103,8 +103,13 @@ function addTaskList() {
 
 function addTask(button) {
     const ul = button.previousElementSibling;
-    const newTask = document.createElement("li");
-    newTask.innerHTML = `<input type="checkbox"> <span contenteditable="true">New Task</span>`;
+    const newTask = document.createElement("div");
+    newTask.innerHTML = `<ul id="taskList">
+                <input type="checkbox"><input type="text" id="task-title" placeholder="New Task">
+                <label for="date" placeholder="MM-DD-YYYY">Due date:</label>
+                <input type="date" id="due">
+            </ul>
+            `;
     ul.appendChild(newTask);
 
     let taskTitle = document.getElementById('task-title');
@@ -114,10 +119,10 @@ function addTask(button) {
         method: "POST",
     
         body: JSON.stringify({
-            title: taskTitle,
-            due: dueDate,
+            title: taskTitle.value,
+            due: dueDateInput.value,
             progress: false
-        }),
+        })
     })
     
     .then(response => {
@@ -182,9 +187,7 @@ function createWidget(type) {
     } else if (type === 'task-list') {
         widget.innerHTML = `
             <ul id="taskList">
-                <li><input type="text" id="task-title" placeholder="New Task"></li>
-                <label for="date" placeholder="MM-DD-YYYY">Due date:</label>
-                <li><input type="date" id="due"></li>
+                <input type="text" id="taskList" placeholder="My Task List">
             </ul>
             <button onclick="addTask(this)">Add Task</button>
         `;
