@@ -7,7 +7,7 @@ CREATE TABLE users (
     password VARCHAR (100) NOT NULL,
     email VARCHAR (255) UNIQUE NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    last_login TIMESTAMP, 
+    last_login TIMESTAMP
 );
 
 CREATE TABLE friend_requests (
@@ -35,6 +35,19 @@ CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
     content VARCHAR (1000) NOT NULL,
     creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE study_sets (
+    id SERIAL PRIMARY KEY,
+    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    title VARCHAR (50) NOT NULL
+);
+
+CREATE TABLE flashcards (
+    id SERIAL PRIMARY KEY,
+    studyset_id INTEGER FOREIGN KEY (studyset_id) REFERENCES study_sets(id) ON DELETE CASCADE,
+    front VARCHAR (300) NOT NULL,
+    back VARCHAR (300) NOT NULL
 );
 
 CREATE TABLE group_sessions (
