@@ -491,12 +491,6 @@ app.post("friends/update", (req, res) => {
   })
 });
 
-let cookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: "strict",
-};
-
 function makeToken() {
   // maybe increase the bytes for this, also increase the length to store password in db
   return crypto.randomBytes(18).toString("hex");
