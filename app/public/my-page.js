@@ -1,3 +1,4 @@
+
 document.getElementById("uploadImageBtn").addEventListener("click", () => {
     document.getElementById("imageUploader").click();
 });
@@ -105,6 +106,28 @@ function addTask(button) {
     const newTask = document.createElement("li");
     newTask.innerHTML = `<input type="checkbox"> <span contenteditable="true">New Task</span>`;
     ul.appendChild(newTask);
+
+    let taskTitle = document.getElementById('task-title');
+    let dueDateInput = document.getElementById('due');
+
+    fetch("task/add", {
+        method: "POST",
+    
+        body: JSON.stringify({
+            title: taskTitle,
+            due: dueDate,
+            progress: false
+        }),
+    })
+    
+    .then(response => {
+        return response.json("");
+    }).then(body => {
+        console.log(body);
+    }).catch(error => {
+        console.log(error);
+    });
+    console.log("Sent request POST /task/add"); 
 }
 
 function makeDraggable(element) {
@@ -159,7 +182,9 @@ function createWidget(type) {
     } else if (type === 'task-list') {
         widget.innerHTML = `
             <ul id="taskList">
-                <li><input type="text" placeholder="New Task"></li>
+                <li><input type="text" id="task-title" placeholder="New Task"></li>
+                <label for="date" placeholder="MM-DD-YYYY">Due date:</label>
+                <li><input type="date" id="due"></li>
             </ul>
             <button onclick="addTask(this)">Add Task</button>
         `;

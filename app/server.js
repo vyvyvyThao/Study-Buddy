@@ -43,10 +43,9 @@ app.use("*", (req, res, next) => {
   next();
 });
 
-
 /* -------------------------------------------------- */
 // TO-DO: Only response to requests if user is authenticated
-app.get("/notes", (req, res) => {
+app.get("/notes", authorize, (req, res) => {
   pool.query(`SELECT * FROM notes WHERE creator_id = $1`, [currUser.user_id]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
@@ -57,8 +56,9 @@ app.get("/notes", (req, res) => {
   });
 })
 
-app.post("/notes/add", (req, res) => {
+app.post("/notes/add", authorize, (req, res) => {
   let body = req.body;
+  console.log("request user id:", req.body.creatorId);
   if (
     !body.hasOwnProperty("content") ||
     !body.hasOwnProperty("creatorId")
@@ -67,7 +67,7 @@ app.post("/notes/add", (req, res) => {
   }
 
   let creatorExist = true;
-  pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [creatorId])
+  pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [body.creatorId])
   .then(result => {
     // console.log(result.rows);
     if (result.rows.length == 0) {
@@ -92,7 +92,7 @@ app.post("/notes/add", (req, res) => {
   res.send();
 })
 
-app.get("/tasks", (req, res) => {
+app.get("/tasks", authorize, (req, res) => {
   pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [currUser.user_id]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
@@ -103,13 +103,15 @@ app.get("/tasks", (req, res) => {
   });
 })
 
-app.post("/task/add", (req, res) => {
+app.post("/task/add", authorize, (req, res) => {
+  let auth = req.headers["Authorization"];
+  console.log(auth);
+
   let body = req.body;
   if (
     !body.hasOwnProperty("title") ||
     !body.hasOwnProperty("due") ||
-    !body.hasOwnProperty("progress") ||
-    !body.hasOwnProperty("creatorId")
+    !body.hasOwnProperty("progress")
   ) {
     return res.status(404);
   }
@@ -117,7 +119,7 @@ app.post("/task/add", (req, res) => {
   let title = body.title;
   let due = body.due;
   let progress = body.progress;  // done or not
-  let creatorId = body.creatorId;
+  let creatorId = currUser.user_id;
 
   let creatorExist = true;
   let today = new Date();
@@ -136,7 +138,7 @@ app.post("/task/add", (req, res) => {
   if (title.length < 1 || title.length > 50){
       res.status(400).json({error: 'invalid title'});
   
-  } else if (today < dueDate) {
+  } else if (today > dueDate) {
     res.status(400).json({error: 'invalid due date'});
 
   } else if (creatorExist) {
@@ -421,7 +423,7 @@ app.post("/login", async (req, res) => {
   });
   // Updating current user with the logged in user
   currUser = {};
-  currUser["creatorId"] = user_id;
+  currUser["user_id"] = user_id;
   currUser["username"] = username;
 
   // TODO: check this again
@@ -429,9 +431,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  return res.json({"url": "/my-page.html"});
-
-
+  return res.json({"url": "/my-page.html", "token": token});
 });
 
 // app.get("/my-page/:user_id", (req, res) => {
