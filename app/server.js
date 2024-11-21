@@ -443,7 +443,7 @@ app.post("/login", async (req, res) => {
 // })
 
 // to authorize the user
-let authorize = (req, res, next) => {
+function authorize(req, res, next) {
   let { token } = req.cookies;
   console.log(token);
   let tokens;
