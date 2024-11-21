@@ -645,26 +645,6 @@ app.post("/login", async (req, res) => {
 //   //return res.sendFile("/public/my-page.html", {root: __dirname});
 // })
 
-// to authorize the user
-function authorize(req, res, next) {
-  let { token } = req.cookies;
-  console.log(token);
-  let tokens;
-  try {
-    tokens = pool.query(
-      `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
-    );
-  } catch (error) {
-    console.log("ERROR", error);
-  }
-
-  if (token === undefined || tokens.length === 0) {
-    return res.sendStatus(403); // TODO
-  }
-  next();
-};
-
-
 // TODO: automatic user login after signup
 // TODO: logout frontend + client side 
 // DONE: logout
