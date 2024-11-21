@@ -9,9 +9,33 @@
 
 <body>
   <div id="header">
-    <h4>Welcome!</h4>
+    <h1>Study Buddy</h1>
   </div>
 
+  <div class="main">  	
+    <input type="checkbox" id="chk" aria-hidden="true">
+
+      <div class="signup">
+        <form>
+          <label for="chk" aria-hidden="true">Sign up</label>
+          <input id="signup_username" type="text" name="name" placeholder="Username" required="">
+          <input id="signup_email" type="email" placeholder="Email" required="">
+          <input id="signup_password" type="password" name="pswd" placeholder="Password" required="">
+          <button>Sign up</button>
+        </form>
+      </div>
+
+      <div class="login">
+        <form>
+          <label for="chk" aria-hidden="true">Login</label>
+          <input id="username" type="username" name="username" placeholder="Email" required="">
+          <input id="password" type="password" name="pswd" placeholder="Password" required="">
+          <button>Login</button>
+        </form>
+      </div>
+  </div>
+  
+  <script src="landing.js"></script>
 </body>
 
 </html>
