@@ -461,9 +461,11 @@ function authorize(req, res, next) {
   next();
 };
 
-// TODO: logout
+
 // TODO: automatic user login after signup
-// TODO: put authorize middleware in other requests
+// TODO: logout frontend + client side 
+// DONE: logout
+// DONE: put authorize middleware in other requests
 
 app.post("/logout", (req, res) => {
   let { token } = req.cookies;
