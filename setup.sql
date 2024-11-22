@@ -30,24 +30,24 @@ CREATE TABLE tasks (
     title VARCHAR (50) NOT NULL,
     due TIMESTAMP NOT NULL,
     progress BOOLEAN,
-    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
+    creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
     content VARCHAR (1000) NOT NULL,
-    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE
+    creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE study_sets (
     id SERIAL PRIMARY KEY,
-    creator_id INTEGER FOREIGN KEY (creator_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    creator_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     title VARCHAR (50) NOT NULL
 );
 
 CREATE TABLE flashcards (
     id SERIAL PRIMARY KEY,
-    studyset_id INTEGER FOREIGN KEY (studyset_id) REFERENCES study_sets(id) ON DELETE CASCADE,
+    studyset_id INTEGER REFERENCES study_sets(id) ON DELETE CASCADE,
     front VARCHAR (300) NOT NULL,
     back VARCHAR (300) NOT NULL
 );
