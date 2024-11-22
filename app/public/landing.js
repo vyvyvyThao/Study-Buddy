@@ -1,19 +1,23 @@
-let signup_button = document.getElementById("signup");
-let login_button = document.getElementById("login");
+let signup_button = document.getElementById("signupB");
+let login_button = document.getElementById("loginB");
+
+let signupUsernameInput = document.getElementById("signup_username");
+let signupEmailInput = document.getElementById("signup_email");
+let signupPasswordInput = document.getElementById("signup_password");
+
+let usernameInput = document.getElementById("username");
+let passwordInput = document.getElementById("password");
 
 signup_button.addEventListener("click", () => {
-  let usernameInput = document.getElementById("signup_username");
-  let emailInput = document.getElementById("signup_email");
-  let passwordInput = document.getElementById("signup_password");
   let currentDate = new Date();
   let timestampValue = currentDate.toISOString();
   let dateAndTime = timestampValue.split('T');
   let timeVal = dateAndTime[1].split('.');
   let finalTimestampValue = dateAndTime[0] + " " + timeVal[0];
   //console.log(finalTimestampValue);
-  let usernameValue = usernameInput.value;
-  let emailValue = emailInput.value;
-  let passwordValue = passwordInput.value;
+  let usernameValue = signupUsernameInput.value;
+  let emailValue = signupEmailInput.value;
+  let passwordValue = signupPasswordInput.value;
   //console.log(username, email, password);
   fetch("/register", {
     method: "POST",
@@ -31,8 +35,6 @@ signup_button.addEventListener("click", () => {
 
 
 login_button.addEventListener("click", () => {
-  let usernameInput = document.getElementById("username");
-  let passwordInput = document.getElementById("password");
   let currentDate = new Date();
   let timestampValue = currentDate.toISOString();
   let dateAndTime = timestampValue.split('T');
