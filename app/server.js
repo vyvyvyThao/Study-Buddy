@@ -103,7 +103,7 @@ app.post("/register", async (req, res) => {
     console.log("hash failed", error);
     return res.sendStatus(500);
   }    
-  console.log("HASH: ", hash);
+  // console.log("HASH: ", hash);
 
   await pool.query(
     `INSERT INTO users(username, password, email, created_at)
@@ -119,7 +119,7 @@ app.post("/register", async (req, res) => {
     return res.status(500).send();
   });
   // TODO: change the result body (look into automatic logging in after sign up)
-  return res.sendStatus(200);
+  return res.status(200).redirect("/login");
 });
 
 app.post("/login", async (req, res) => {
@@ -173,19 +173,34 @@ app.post("/login", async (req, res) => {
     return res.sendStatus(400);
   }
 
-  //TODO: if already logged in, do not generate another token before the earlier one expires
+  //DONE: if already logged in, do not generate another token before the earlier one expires
   // and set an expiry for it
-  let token = makeToken();
-  console.log("Generated token", token);
-  pool.query(
-    `INSERT INTO login_tokens(token, user_id)
-    VALUES($1, $2)
-    RETURNING *`,
-    [token, user_id],
-  ).catch((error) => {
-    console.log(error);
-    return res.status(500).send();
-  });
+  let existingTokens;
+  let token;
+  try {
+    existingTokens = await pool.query(
+      `SELECT * FROM login_tokens WHERE user_id = $1`, [user_id],
+    );
+    if (existingTokens.length === 0) {
+      token = makeToken();
+      console.log("Generated token", token);
+      pool.query(
+        `INSERT INTO login_tokens(token, user_id)
+        VALUES($1, $2)
+        RETURNING *`,
+        [token, user_id],
+      ).catch((error) => {
+        console.log(error);
+        return res.status(500).send();
+      });
+    } else {
+      // console.log(existingTokens.rows);
+      token = existingTokens.rows[0].token;
+    }
+  } catch (error) {
+    console.log("ERROR", error);
+  }
+  
   // Updating current user with the logged in user
   currUser = {};
   currUser["user_id"] = user_id;
@@ -226,7 +241,7 @@ let authorize = (req, res, next) => {
   next();
 };
 
-// TODO: logout
+// TODO: logout frontend in my-page
 // TODO: automatic user login after signup
 // TODO: put authorize middleware in other requests
 
