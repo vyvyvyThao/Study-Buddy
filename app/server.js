@@ -238,6 +238,8 @@ let authorize = (req, res, next) => {
   if (token === undefined || tokens.length === 0) {
     return res.sendStatus(403); // TODO
   }
+
+  res.locals.userId = tokens.rows[0].user_id
   next();
 };
 
@@ -696,6 +698,55 @@ app.post("friends/update", (req, res) => {
 function invalidChatId(chatId) {
   return false;
 }
+
+
+
+app.post("/chat", authorize, (req, res) => {  
+  let body = req.body;
+  if (!body.hasOwnProperty("otherUserIds")) {
+    return res.sendStatus(400);
+  }
+
+  if (!Array.isArray(body["otherUserIds"])) {
+    return res.sendStatus(400);
+  }
+
+  if (body["otherUserIds"].length != 1) {
+    return res.sendStatus(400);
+  }
+  
+  let users;
+  pool.query("SELECT * FROM users WHERE user_id IN $1", [otherUserIds]).then(result => {
+    users = result.rows
+  }).catch((error)=> {
+    console.log(error);
+    return res.sendStatus(500);
+  })
+
+  if (body["otherUserIds"].length != users.length) {
+    return res.sendStatus(400);
+  }
+
+  let newChatId;
+  pool.query("INSERT INTO chat VALUES(NULL) RETURNING *").then((result) => {
+    newChatId = result.rows.chat_id
+  }).catch((error)=> {
+    console.log(error);
+    return res.sendStatus(500);
+  })
+
+  values = []
+  values.push([newChatId, res.locals.userId])
+  for(let userId of body["otherUserIds"]) {
+    values.append([newChatId, userId])
+  }
+  
+  pool.query("INSERT INTO chat_user(chat_id, user_id) VALUES $1", values).then(result => {
+    
+  })
+
+  return res.status(200).json({"chatId": newChatId});
+})
 
 app.get("/messages/:chatId", (req, res) => {
   let { chatId } = req.params;

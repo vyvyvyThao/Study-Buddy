@@ -96,6 +96,7 @@ INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
 
 CREATE TABLE chat_messages(
     chat_id INTEGER,
+    sender_id INTEGER REFERENCES users(user_id) DEFAULT NULL;
     chat_message TEXT,
     sent_date TIMESTAMP NOT NULL
 );
