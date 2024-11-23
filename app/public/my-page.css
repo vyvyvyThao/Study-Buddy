@@ -65,7 +65,12 @@ body, html {
     z-index: 600;
 }
 
-.timer, .note, .task-list {
+.timer, .note {
+    width: 200px;
+    margin: 5px 0;
+}
+
+.task-list {
     width: 500px;
     margin: 5px 0;
 }
