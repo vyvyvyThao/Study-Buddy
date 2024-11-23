@@ -66,7 +66,7 @@ body, html {
 }
 
 .timer, .note, .task-list {
-    width: 200px;
+    width: 500px;
     margin: 5px 0;
 }
 
@@ -74,8 +74,16 @@ body, html {
     margin: 5px 0;
 }
 
+.task-list table {
+    border-spacing: 10px;
+}
+
 .show-sidebar {
     left: 0;
+}
+
+.task-done {
+    text-decoration: line-through;
 }
 
 button {

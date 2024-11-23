@@ -115,6 +115,9 @@ function addTask(button) {
     let taskTitle = document.getElementById('task-title');
     let dueDateInput = document.getElementById('due');
 
+    console.log(taskTitle.value);
+    console.log(dueDateInput.value);
+
     fetch("task/add", {
         method: "POST",
     
@@ -126,7 +129,7 @@ function addTask(button) {
     })
     
     .then(response => {
-        return response.json("");
+        return response.body;
     }).then(body => {
         console.log(body);
     }).catch(error => {
@@ -188,9 +191,44 @@ function createWidget(type) {
         widget.innerHTML = `
             <ul id="taskList">
                 <input type="text" id="taskList" placeholder="My Task List">
+                <div id="list"></div>
             </ul>
             <button onclick="addTask(this)">Add Task</button>
         `;
+        let taskRows;
+        let row;
+
+        fetch("tasks").then(response => {
+            return response.json();
+        }).then(body => {
+            taskRows = body["rows"];
+            let taskList = document.getElementById("taskList");
+            let html_str = "<table>";
+            for (let i = 0; i < taskRows.length; i++) {
+                row = taskRows[i];
+                console.log(row);
+                let due_date = row.due.split("T")[0];
+                if (row.progress) {
+                    html_str += `<tr class="task-done" id="${row.id}">`;
+                    html_str += `<td><input type="checkbox" checked/></td>`;
+                    html_str += `<td>${row.title}</td>`;
+                    html_str += `<td>due ${due_date}</td>`;
+                    html_str += "</tr>";
+                } else {
+                    html_str += `<tr id="${row.id}">`;
+                    html_str += `<td><input type="checkbox"/></td>`;
+                    html_str += `<td>${row.title}</td>`;
+                    html_str += `<td>due ${due_date}</td>`;
+                    html_str += "</tr>";
+                }
+            }
+            html_str += "</table>"
+            taskList.innerHTML = html_str;
+        }).catch(error => {
+            console.log(error);
+        });
+        console.log("Sent request GET /tasks"); 
+
     }
 
     let isDragging = false;
