@@ -18,6 +18,14 @@ input.addEventListener("keypress", (event) => {
 window.onload = function () {
     populateFriendList();
     populateFriendRequests();
+    
+    fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
+        return response.json();
+    }).then((body) => {
+        for( let messageObject of body.messages) {
+            appendMessage(messageObject.chat_message)
+        }
+    })
 };
 
 function populateFriendList() {
@@ -84,6 +92,7 @@ function sendMessage() {
         chatBox.appendChild(element);
         chatBox.scrollTo(0, chatBox.scrollHeight);
         input.value = "";
+        socket.emit("send message", {"message": message })
     } else {
         alert("Select a friend to chat with and enter a message!");
     }

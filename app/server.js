@@ -710,7 +710,15 @@ function invalidChatId(chatId) {
   return false;
 }
 
+app.get("/friends/:chatId", (req, res) => {
+  let { chatId } = req.params;
 
+  if (invalidChatId(chatId)) {
+    return res.status(404).send();
+  }
+
+  return res.sendFile("public/friends/friends.html", { root: __dirname });
+})
 
 app.post("/chat", authorize, (req, res) => {
   let body = req.body;
@@ -811,10 +819,11 @@ io.on("connection", async (socket) => {
       "INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES($1, $2, $3) RETURNING *",
       [chatId, message, new Date(new Date().toISOString())]
     ).then((result) => {
+      socket.to(chatId).emit("sent message", {"message": message});
     }).catch(error => {
       console.log(error);
     })
-    socket.to(chatId).emit("sent message", {"message": message});
+    
   });
 });
 
