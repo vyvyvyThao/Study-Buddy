@@ -3,6 +3,18 @@ const friends = ["Alice", "Bob", "Charlie"];
 const friendRequests = ["David", "Eve"];
 let chatHistory = {};
 
+let socket = io();
+let chatIdString = window.location.pathname.split("/").pop();
+
+
+let input = document.getElementById("chat-message");
+input.addEventListener("keypress", (event) => {
+    if (event.keyCode == 13) {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
 window.onload = function () {
     populateFriendList();
     populateFriendRequests();
@@ -65,13 +77,26 @@ function sendMessage() {
     const message = input.value;
     const friend = chatBox.querySelector("h4")?.textContent.split(" ")[2];
     if (friend && message) {
-        const p = document.createElement("p");
-        p.textContent = `You: ${message}`;
-        chatBox.appendChild(p);
         if (!chatHistory[friend]) chatHistory[friend] = [];
         chatHistory[friend].push(`You: ${message}`);
+
+        const element = createMessageElement(message, "You");
+        chatBox.appendChild(element);
+        chatBox.scrollTo(0, chatBox.scrollHeight);
         input.value = "";
     } else {
         alert("Select a friend to chat with and enter a message!");
     }
 }
+
+function createMessageElement(message, sender) {
+    let element = document.createElement("div");
+    element.textContent = `${sender}: ${message}`;
+    return element
+}
+
+socket.on('sent message', function ({message, sender}) {
+    let element = createMessageElement(message, sender);
+    chatBox.appendChild(element);
+    chatBox.scrollTo(0, chatBox.scrollHeight);
+});

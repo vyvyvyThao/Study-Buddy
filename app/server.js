@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 let argon2 = require("argon2");
 let cookieParser = require("cookie-parser");
 let crypto = require("crypto");
+let cookie = require("cookie");
 
 const app = express();
 let server = http.createServer(app);
@@ -223,19 +224,19 @@ app.post("/login", async (req, res) => {
 // })
 
 // to authorize the user
-let authorize = (req, res, next) => {
+let authorize = async (req, res, next) => {
   let { token } = req.cookies;
   console.log(token);
   let tokens;
   try {
-    tokens = pool.query(
+    tokens = await pool.query(
       `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
     );
   } catch (error) {
     console.log("ERROR", error);
   }
 
-  if (token === undefined || tokens.length === 0) {
+  if (token === undefined || tokens.rows.length === 0) {
     return res.sendStatus(403); // TODO
   }
 
@@ -243,6 +244,16 @@ let authorize = (req, res, next) => {
   next();
 };
 
+async function getUserId(token) {
+  try {
+    tokens = await pool.query(
+      `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
+    );
+  } catch (error) {
+    console.log("ERROR", error);
+  }
+  return tokens.rows[0].user_id
+}
 // TODO: logout frontend in my-page
 // TODO: automatic user login after signup
 // TODO: put authorize middleware in other requests
@@ -774,13 +785,21 @@ app.get("/chat-messages", (req, res) => {
   })
 }) 
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log(`Socket ${socket.id} connected`);
 
   let url = socket.handshake.headers.referer;
   let pathParts = url.split("/");
   let chatId = pathParts[pathParts.length - 1];
 
+
+  let cookies = cookie.parse(socket.handshake.headers.cookie);
+  try {
+    socket.data.userId = await getUserId(cookies.token);
+  } catch {
+    socket.disconnect();
+  }
+  
   if (invalidChatId(chatId)) {
     return;
   }
@@ -791,8 +810,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send message", ({ message }) => {
-    console.log(`Socket ${socket.id} sent message: ${message}, ${chatId}`);
-    console.log("Broadcasting message to other sockets");
     pool.query(
       "INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES($1, $2, $3) RETURNING *",
       [chatId, message, new Date(new Date().toISOString())]
@@ -800,7 +817,7 @@ io.on("connection", (socket) => {
     }).catch(error => {
       console.log(error);
     })
-    socket.to(chatId).emit("sent message", message);
+    socket.to(chatId).emit("sent message", {"message": message});
   });
 });
 

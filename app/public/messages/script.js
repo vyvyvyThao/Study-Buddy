@@ -39,6 +39,6 @@ messageInput.addEventListener("keypress", (event) => {
   }
 });
 
-socket.on('sent message', function (message) {
+socket.on('sent message', function ({message}) {
   appendMessage(message);
 });
