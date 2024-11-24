@@ -712,7 +712,7 @@ function invalidChatId(chatId) {
 
 
 
-app.post("/chat", authorize, (req, res) => {  
+app.post("/chat", authorize, (req, res) => {
   let body = req.body;
   if (!body.hasOwnProperty("otherUserIds")) {
     return res.sendStatus(400);
@@ -725,38 +725,35 @@ app.post("/chat", authorize, (req, res) => {
   if (body["otherUserIds"].length != 1) {
     return res.sendStatus(400);
   }
-  
+
   let users;
-  pool.query("SELECT * FROM users WHERE user_id IN $1", [otherUserIds]).then(result => {
-    users = result.rows
-  }).catch((error)=> {
-    console.log(error);
-    return res.sendStatus(500);
-  })
-
-  if (body["otherUserIds"].length != users.length) {
-    return res.sendStatus(400);
-  }
-
   let newChatId;
-  pool.query("INSERT INTO chat VALUES(NULL) RETURNING *").then((result) => {
-    newChatId = result.rows.chat_id
-  }).catch((error)=> {
+
+  pool.query(
+    "SELECT * FROM users WHERE user_id IN $1", [otherUserIds]
+  ).then(result => {
+    users = result.rows;
+    if (body["otherUserIds"].length != users.length) {
+      return res.sendStatus(400);
+    }
+    if (body["otherUserIds"].length != users.length) {
+      return res.sendStatus(400);
+    }
+    return pool.query("INSERT INTO chat VALUES(NULL) RETURNING *")
+  }).then((result) => {
+    newChatId = result.rows.chat_id;
+    values = []
+    values.push([newChatId, res.locals.userId])
+    for (let userId of body["otherUserIds"]) {
+      values.append([newChatId, userId])
+    }
+    return pool.query("INSERT INTO chat_user(chat_id, user_id) VALUES $1", values);
+  }).catch((error) => {
     console.log(error);
     return res.sendStatus(500);
   })
 
-  values = []
-  values.push([newChatId, res.locals.userId])
-  for(let userId of body["otherUserIds"]) {
-    values.append([newChatId, userId])
-  }
-  
-  pool.query("INSERT INTO chat_user(chat_id, user_id) VALUES $1", values).then(result => {
-    
-  })
-
-  return res.status(200).json({"chatId": newChatId});
+  return res.status(200).json({ "chatId": newChatId });
 })
 
 app.get("/messages/:chatId", (req, res) => {
