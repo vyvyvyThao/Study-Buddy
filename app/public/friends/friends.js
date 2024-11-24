@@ -26,7 +26,9 @@ function getUserData() {
         return response.json();
     }).then((body) => {
         usernameElement = document.getElementById("username");
-        usernameElement.innerText = body.username;
+        if (body.username !== undefined){
+            usernameElement.innerText = body.username;
+        }
     })
 }
 
