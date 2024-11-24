@@ -226,7 +226,7 @@ app.post("/login", async (req, res) => {
 // to authorize the user
 let authorize = async (req, res, next) => {
   let { token } = req.cookies;
-  console.log(token);
+
   let tokens;
   try {
     tokens = await pool.query(
@@ -254,6 +254,22 @@ async function getUserId(token) {
   }
   return tokens.rows[0].user_id
 }
+
+async function getUserDetails(userId) {
+  try {
+    result = await pool.query(
+      `SELECT username, user_id FROM users WHERE user_id = $1`, [userId],
+    );
+  } catch (error) {
+    console.log("ERROR", error);
+  }
+  return result.rows[0]
+}
+
+app.get("/user", authorize, async (req, res) => {
+  return res.status(200).json(await getUserDetails(res.locals.userId))
+})
+
 // TODO: logout frontend in my-page
 // TODO: automatic user login after signup
 // TODO: put authorize middleware in other requests
@@ -707,17 +723,27 @@ app.post("friends/update", (req, res) => {
 // })
 
 function invalidChatId(chatId) {
-  return false;
+  chatIdValue = parseInt(chatId)
+  if (isNaN(chatIdValue)) {
+    return true;
+  }
+  
+  pool.query(
+    "SELECT * FROM chat WHERE chat_id = $1", [chatId]
+  ).then(result => {
+    return result.rows.length === 1
+  })
 }
 
-app.get("/friends/:chatId", (req, res) => {
+app.get("/friends/:chatId", authorize, (req, res) => {
   let { chatId } = req.params;
+  let userId = res.locals.userId
 
   if (invalidChatId(chatId)) {
     return res.status(404).send();
   }
 
-  return res.sendFile("public/friends/friends.html", { root: __dirname });
+  return res.sendFile("public/friends/index.html", { root: __dirname });
 })
 
 app.post("/chat", authorize, (req, res) => {
@@ -766,11 +792,6 @@ app.post("/chat", authorize, (req, res) => {
 
 app.get("/messages/:chatId", (req, res) => {
   let { chatId } = req.params;
-
-  if (invalidChatId(chatId)) {
-    return res.status(404).send();
-  }
-
   return res.sendFile("public/messages/index.html", { root: __dirname });
 })
 

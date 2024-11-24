@@ -18,15 +18,17 @@ input.addEventListener("keypress", (event) => {
 window.onload = function () {
     populateFriendList();
     populateFriendRequests();
-    
-    fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
+    getUserData();
+};
+
+function getUserData() {
+    fetch(`/user`).then((response) => {
         return response.json();
     }).then((body) => {
-        for( let messageObject of body.messages) {
-            appendMessage(messageObject.chat_message)
-        }
+        usernameElement = document.getElementById("username");
+        usernameElement.innerText = body.username;
     })
-};
+}
 
 function populateFriendList() {
     const friendsList = document.getElementById("friends-list");
