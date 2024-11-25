@@ -78,16 +78,16 @@ VALUES (1, 'test', '$argon2id$v=19$m=65536,t=3,p=4$sGSNXvZ1XOCwsE9Oo0hZmw$rLXVHw
 INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
 
 
-CREATE TABLE chat(
+CREATE TABLE chats(
     chat_id SERIAL PRIMARY KEY 
 );
 
-INSERT INTO chat(chat_id) VALUES (1);
+INSERT INTO chats(chat_id) VALUES (1);
 
 CREATE TABLE user_chat(
     chat_id INTEGER,
     user_id INTEGER,
-    CONSTRAINT fk_chat_id FOREIGN KEY(chat_id) REFERENCES chat(chat_id),
+    CONSTRAINT fk_chat_id FOREIGN KEY(chat_id) REFERENCES chats(chat_id),
     CONSTRAINT fk_user_id FOREIGN KEY(user_id) REFERENCES users(user_id),
     PRIMARY KEY(chat_id, user_id)
 );
@@ -96,7 +96,7 @@ INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
 
 CREATE TABLE chat_messages(
     chat_id INTEGER,
-    sender_id INTEGER REFERENCES users(user_id) DEFAULT NULL;
+    sender_id INTEGER REFERENCES users(user_id) DEFAULT NULL,
     chat_message TEXT,
     sent_date TIMESTAMP NOT NULL
 );
