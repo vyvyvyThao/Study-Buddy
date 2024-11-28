@@ -480,6 +480,8 @@ app.get("/friends/list", authorize, async (req, res) => {
     , [userId]
   ).then((results) => {
     return res.status(200).json(results.rows)
+  }).catch(error => {
+    console.log(error);
   });
 });
 
@@ -881,5 +883,3 @@ io.on("connection", async (socket) => {
 server.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });
-
-argon2.hash("password4").then((result) => {console.log(result)});

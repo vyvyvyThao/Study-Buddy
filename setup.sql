@@ -109,4 +109,4 @@ INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
 
 INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES (1, 'Filler text for setup', '2024-11-12 18:57:25');
 
-INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2), (2,3), (2,4);
+INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2), (1,4) ,(2,3), (2,4);

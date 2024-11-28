@@ -1,6 +1,6 @@
 // Dummy data for friends and friend requests
-const friends = ["Alice", "Bob", "Charlie"];
-const friendRequests = ["David", "Eve"];
+let friends = ["Alice", "Bob", "Charlie"];
+let friendRequests = ["David", "Eve"];
 let chatHistory = {};
 
 let socket = io();
@@ -44,9 +44,20 @@ function getUserData() {
     })
 }
 
-function populateFriendList() {
+async function populateFriendList() {
     const friendsList = document.getElementById("friends-list");
     friendsList.innerHTML = "";
+
+    friends = await fetch(`/friends/list`).then((response) => {
+        return response.json();
+    }).then((body) => {
+        let temp = [];
+        body.forEach((item) => {
+            temp.push(item.username);
+        })
+        return temp
+    })
+
     friends.forEach(friend => {
         const li = document.createElement("li");
         li.textContent = friend;
