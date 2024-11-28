@@ -71,11 +71,9 @@ CREATE TABLE login_tokens (
   user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE chats(
     chat_id SERIAL PRIMARY KEY 
 );
-
 
 CREATE TABLE user_chat(
     chat_id INTEGER,
@@ -84,8 +82,6 @@ CREATE TABLE user_chat(
     CONSTRAINT fk_user_id FOREIGN KEY(user_id) REFERENCES users(user_id),
     PRIMARY KEY(chat_id, user_id)
 );
-
-
 
 CREATE TABLE chat_messages(
     chat_id INTEGER,
@@ -104,9 +100,13 @@ VALUES
 INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
 
 INSERT INTO chats(chat_id) VALUES (1);
+ALTER SEQUENCE chats_chat_id_seq RESTART WITH 2;
 
 INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
 
-INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES (1, 'Filler text for setup', '2024-11-12 18:57:25');
+INSERT INTO chat_messages(chat_id, sender_id, chat_message, sent_date) 
+VALUES 
+(1, 2, 'Filler text for setup by test2', '2024-11-12 18:57:25'),
+(1, 1, 'Filler text for setup by test', '2024-11-12 18:57:25');
 
-INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2), (1,4) ,(2,3), (2,4);
+INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2), (1,4), (2,3), (2,4);

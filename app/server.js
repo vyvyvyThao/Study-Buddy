@@ -473,10 +473,10 @@ app.post("friends/request", (req, res) => {
 app.get("/friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
   pool.query(
-    `SELECT friend_id, username FROM
+    `SELECT friend_id, username, chat_id FROM
     (SELECT user2_id as friend_id FROM friendships WHERE user1_id = $1 
     UNION SELECT user1_id as friend_id FROM friendships WHERE user2_id = $1) AS t1
-    JOIN users ON t1.friend_id=users.user_id`
+    LEFT JOIN users ON t1.friend_id=users.user_id LEFT JOIN user_chat ON t1.friend_id = user_chat.user_id`
     , [userId]
   ).then((results) => {
     return res.status(200).json(results.rows)
@@ -790,30 +790,53 @@ app.post("/chat", authorize, (req, res) => {
   let newChatId;
 
   pool.query(
-    "SELECT * FROM users WHERE user_id IN $1", [otherUserIds]
+    "SELECT * FROM users WHERE user_id = ANY($1)", [body["otherUserIds"]]
   ).then(result => {
     users = result.rows;
     if (body["otherUserIds"].length != users.length) {
-      return res.sendStatus(400);
+      throw 400;
     }
     if (body["otherUserIds"].length != users.length) {
-      return res.sendStatus(400);
+      throw 400;
     }
-    return pool.query("INSERT INTO chats VALUES(NULL) RETURNING *")
+    return pool.query("INSERT INTO chats DEFAULT VALUES RETURNING *")
   }).then((result) => {
-    newChatId = result.rows.chat_id;
-    values = []
+    let query = "INSERT INTO user_chat(chat_id, user_id) VALUES "
+    newChatId = result.rows[0].chat_id;
+    let values = []
     values.push([newChatId, res.locals.userId])
+
     for (let userId of body["otherUserIds"]) {
-      values.append([newChatId, userId])
+      values.push([newChatId, userId])
     }
-    return pool.query("INSERT INTO chat_user(chat_id, user_id) VALUES $1", values);
+    
+    let count = 1;
+    for (let i = 0; i < values.length; i++) {
+      query += "("
+      for(let j = 0; j < values[i].length; j++) {
+        query += "$"
+        query += `${count}`
+        if (j !== values[i].length - 1) {
+          query += ", "
+        }
+        count++;
+      }
+      query += ")"
+      if (i !== values.length - 1) {
+        query += ","
+      }
+    }
+
+    return pool.query(query, values.flat());
+  }).then(() => {
+    return res.status(200).json({ "chatId": newChatId });
   }).catch((error) => {
     console.log(error);
+    if (error === 400){
+      return res.sendStatus(400);
+    }
     return res.sendStatus(500);
   })
-
-  return res.status(200).json({ "chatId": newChatId });
 })
 
 app.get("/messages/:chatId", (req, res) => {
@@ -824,11 +847,14 @@ app.get("/messages/:chatId", (req, res) => {
 app.get("/chat-messages", (req, res) => {
   let { chatId } = req.query;
   if (invalidChatId(chatId)) {
-    return;
+    return res.sendStatus(400);
   }
   
   pool.query(
-    "SELECT * FROM chat_messages WHERE chat_id = $1 ORDER BY sent_date", 
+    `SELECT chat_id, sender_id, username AS sender_username, chat_message, sent_date FROM
+    (SELECT * FROM chat_messages WHERE chat_id = $1) as t1
+    LEFT JOIN users ON t1.sender_id = users.user_id
+    ORDER BY sent_date`, 
     [chatId]
   ).then((result) => {
     return res.status(200).json({messages: result.rows})
@@ -855,8 +881,6 @@ io.on("connection", async (socket) => {
   } catch {
     // socket.disconnect();
   }
-  // console.log(cookies.token)
-  console.log(socket.data.userId);
   
   if (invalidChatId(chatId)) {
     return;
@@ -873,7 +897,6 @@ io.on("connection", async (socket) => {
       [chatId, socket.data.userId ,message, new Date(new Date().toISOString())]
     ).then((result) => {
       socket.to(chatId).emit("sent message", {"message": message});
-      console.log(result.rows)
     }).catch(error => {
       console.log(error);
     });

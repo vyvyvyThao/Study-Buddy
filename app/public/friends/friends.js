@@ -1,18 +1,28 @@
 // Dummy data for friends and friend requests
-let friends = ["Alice", "Bob", "Charlie"];
+let friends = [{"username":"Alice"}, {"username":"Bob"}, {"username":"Charlie"}];
 let friendRequests = ["David", "Eve"];
 let chatHistory = {};
 
 let socket = io();
-let chatIdString = window.location.pathname.split("/").pop();
 let chatBox = document.getElementById("chat-box");
+let userDetails;
+
+
+function getChatId() {
+    return window.location.pathname.split("/").pop();
+}
 
 function getChatMessages(chatIdString) {
     fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
     return response.json();
     }).then((body) => {
         for( let messageObject of body.messages) {
-            let element = createMessageElement(messageObject.chat_message, messageObject.sender_id);
+            let messageText = messageObject.chat_message;
+            let senderUsername = messageObject.sender_username;
+            if (messageObject.sender_id === userDetails.user_id) {
+                senderUsername = "You"
+            }
+            let element = createMessageElement(messageText, senderUsername);
             chatBox.appendChild(element);
             chatBox.scrollTo(0, chatBox.scrollHeight);
         }
@@ -33,10 +43,11 @@ window.onload = function () {
     getUserData();
 };
 
-function getUserData() {
+async function getUserData() {
     fetch(`/user`).then((response) => {
         return response.json();
     }).then((body) => {
+        userDetails = body;
         usernameElement = document.getElementById("username");
         if (body.username !== undefined){
             usernameElement.innerText = body.username;
@@ -47,20 +58,21 @@ function getUserData() {
 async function populateFriendList() {
     const friendsList = document.getElementById("friends-list");
     friendsList.innerHTML = "";
-
-    friends = await fetch(`/friends/list`).then((response) => {
-        return response.json();
-    }).then((body) => {
-        let temp = [];
-        body.forEach((item) => {
-            temp.push(item.username);
+    try{
+        friends = await fetch(`/friends/list`).then((response) => {
+            return response.json();
+        }).then((body) => {
+            let temp = [];
+            body.forEach((item) => {
+                temp.push(item);
+            })
+            return temp
         })
-        return temp
-    })
+    } catch {}
 
     friends.forEach(friend => {
         const li = document.createElement("li");
-        li.textContent = friend;
+        li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
     });
@@ -97,14 +109,34 @@ function acceptFriendRequest(username) {
 
 function selectFriend(friend) {
     const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML = `<h4>Chatting with ${friend}</h4>`;
+    chatBox.innerHTML = `<h4>Chatting with ${friend.username}</h4>`;
     // if (!chatHistory[friend]) chatHistory[friend] = [];
     // chatHistory[friend].forEach(message => {
     //     const p = document.createElement("p");
     //     p.textContent = message;
     //     chatBox.appendChild(p);
     // });
-    getChatMessages(chatIdString);
+    if (friend.chat_id) {
+        history.pushState(".","", `/friends/${friend.chat_id}`)
+        let chatIdString = getChatId();
+        getChatMessages(chatIdString);
+    } else {
+        fetch(`/chat`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"otherUserIds": [friend.friend_id]})
+        }).then((response) => {
+            return response.json();
+        }).then((body) => {
+            history.pushState(".", "", `/friends/${body.chatId}`)
+            friend.chat_id = body.chatId;
+            let chatIdString = getChatId();
+            getChatMessages(chatIdString);
+        }).catch()
+    };
+
 }
 
 function sendMessage() {
