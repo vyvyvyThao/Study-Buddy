@@ -71,18 +71,11 @@ CREATE TABLE login_tokens (
   user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-INSERT INTO users(user_id, username, password, email, created_at)
-VALUES (1, 'test', '$argon2id$v=19$m=65536,t=3,p=4$sGSNXvZ1XOCwsE9Oo0hZmw$rLXVHw1A+mCip+Nzs2BYLfhMVh/l3KjiYY3zt0j35Jw', 'test1@gmail.com', '2024-11-12 18:57:25'),
-(2, 'test2', '$argon2id$v=19$m=65536,t=3,p=4$tRdux4KRbuFrE8zu2lg+Sg$tqXhH7197yHdNEemzSj2wDZC5V4EiAegAI7aItkeS5w', 'test2@gmail.com', '2024-11-12 18:57:25');
-
-INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
-
 
 CREATE TABLE chats(
     chat_id SERIAL PRIMARY KEY 
 );
 
-INSERT INTO chats(chat_id) VALUES (1);
 
 CREATE TABLE user_chat(
     chat_id INTEGER,
@@ -92,7 +85,7 @@ CREATE TABLE user_chat(
     PRIMARY KEY(chat_id, user_id)
 );
 
-INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
+
 
 CREATE TABLE chat_messages(
     chat_id INTEGER,
@@ -100,6 +93,16 @@ CREATE TABLE chat_messages(
     chat_message TEXT,
     sent_date TIMESTAMP NOT NULL
 );
+
+INSERT INTO users(user_id, username, password, email, created_at)
+VALUES (1, 'test', '$argon2id$v=19$m=65536,t=3,p=4$sGSNXvZ1XOCwsE9Oo0hZmw$rLXVHw1A+mCip+Nzs2BYLfhMVh/l3KjiYY3zt0j35Jw', 'test1@gmail.com', '2024-11-12 18:57:25'),
+(2, 'test2', '$argon2id$v=19$m=65536,t=3,p=4$tRdux4KRbuFrE8zu2lg+Sg$tqXhH7197yHdNEemzSj2wDZC5V4EiAegAI7aItkeS5w', 'test2@gmail.com', '2024-11-12 18:57:25');
+
+INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
+
+INSERT INTO chats(chat_id) VALUES (1);
+
+INSERT INTO user_chat(chat_id, user_id) VALUES (1, 1), (1, 2);
 
 INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES (1, 'Filler text for setup', '2024-11-12 18:57:25');
 
