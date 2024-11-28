@@ -182,7 +182,7 @@ app.post("/login", async (req, res) => {
     existingTokens = await pool.query(
       `SELECT * FROM login_tokens WHERE user_id = $1`, [user_id],
     );
-    if (existingTokens.length === 0) {
+    if (existingTokens.rows.length === 0) {
       token = makeToken();
       console.log("Generated token", token);
       pool.query(
@@ -267,7 +267,14 @@ async function getUserDetails(userId) {
 }
 
 app.get("/user", authorize, async (req, res) => {
-  return res.status(200).json(await getUserDetails(res.locals.userId))
+  let userDetails
+  try {
+    userDetails = await getUserDetails(res.locals.userId)
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+  return res.status(200).json(userDetails)
 })
 
 // TODO: logout frontend in my-page
@@ -463,10 +470,17 @@ app.post("friends/request", (req, res) => {
   })
 });
 
-app.get("friends/list", authorize, async (req, res) => {
+app.get("/friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
-  pool.query("SELECT * FROM friendships WHERE user1_id = $1 or user2_id = $1", [userId])
-  
+  pool.query(
+    `SELECT friend_id, username FROM
+    (SELECT user2_id as friend_id FROM friendships WHERE user1_id = $1 
+    UNION SELECT user1_id as friend_id FROM friendships WHERE user2_id = $1) AS t1
+    JOIN users ON t1.friend_id=users.user_id`
+    , [userId]
+  ).then((results) => {
+    return res.status(200).json(results.rows)
+  });
 });
 
 app.post("friends/update", (req, res) => {
@@ -867,3 +881,5 @@ io.on("connection", async (socket) => {
 server.listen(port, hostname, () => {
   console.log(`Listening at: http://${hostname}:${port}`);
 });
+
+argon2.hash("password4").then((result) => {console.log(result)});
