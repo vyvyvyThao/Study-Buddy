@@ -249,7 +249,6 @@ async function getUserId(token) {
     tokens = await pool.query(
       `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
     );
-    console.log(tokens)
   } catch (error) {
     console.log("ERROR", error);
   }
@@ -466,7 +465,7 @@ app.post("friends/request", (req, res) => {
 
 app.get("friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
-  pool.query("")
+  pool.query("SELECT * FROM friendships WHERE user1_id = $1 or user2_id = $1", [userId])
   
 });
 
@@ -828,9 +827,10 @@ io.on("connection", async (socket) => {
   let url = socket.handshake.headers.referer;
   let pathParts = url.split("/");
   let chatId = pathParts[pathParts.length - 1];
-
+  
+  let cookies;
   try {
-    let cookies = cookie.parse(socket.handshake.headers.cookie);
+    cookies = cookie.parse(socket.handshake.headers.cookie);
   } catch {
   }
   
@@ -839,6 +839,8 @@ io.on("connection", async (socket) => {
   } catch {
     // socket.disconnect();
   }
+  // console.log(cookies.token)
+  console.log(socket.data.userId);
   
   if (invalidChatId(chatId)) {
     return;
@@ -851,10 +853,11 @@ io.on("connection", async (socket) => {
 
   socket.on("send message", ({ message }) => {
     pool.query(
-      "INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES($1, $2, $3) RETURNING *",
-      [chatId, message, new Date(new Date().toISOString())]
+      "INSERT INTO chat_messages(chat_id, sender_id ,chat_message, sent_date) VALUES($1, $2, $3, $4) RETURNING *",
+      [chatId, socket.data.userId ,message, new Date(new Date().toISOString())]
     ).then((result) => {
       socket.to(chatId).emit("sent message", {"message": message});
+      console.log(result.rows)
     }).catch(error => {
       console.log(error);
     });
