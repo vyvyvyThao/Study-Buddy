@@ -249,6 +249,7 @@ async function getUserId(token) {
     tokens = await pool.query(
       `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
     );
+    console.log(tokens)
   } catch (error) {
     console.log("ERROR", error);
   }
@@ -461,6 +462,12 @@ app.post("friends/request", (req, res) => {
     console.log(error);
     return res.status(500).send();
   })
+});
+
+app.get("friends/list", authorize, async (req, res) => {
+  let userId =  res.locals.userId;
+  pool.query("")
+  
 });
 
 app.post("friends/update", (req, res) => {
@@ -729,11 +736,15 @@ function invalidChatId(chatId) {
   }
   
   pool.query(
-    "SELECT * FROM chat WHERE chat_id = $1", [chatId]
+    "SELECT * FROM chats WHERE chat_id = $1", [chatId]
   ).then(result => {
     return result.rows.length === 1
   })
 }
+
+app.get("/friends", authorize, (req, res) => {
+  return res.sendFile("public/friends/friends.html", { root: __dirname });
+});
 
 app.get("/friends/:chatId", authorize, (req, res) => {
   let { chatId } = req.params;
@@ -743,7 +754,7 @@ app.get("/friends/:chatId", authorize, (req, res) => {
     return res.status(404).send();
   }
 
-  return res.sendFile("public/friends/index.html", { root: __dirname });
+  return res.sendFile("public/friends/friends.html", { root: __dirname });
 })
 
 app.post("/chat", authorize, (req, res) => {
@@ -773,7 +784,7 @@ app.post("/chat", authorize, (req, res) => {
     if (body["otherUserIds"].length != users.length) {
       return res.sendStatus(400);
     }
-    return pool.query("INSERT INTO chat VALUES(NULL) RETURNING *")
+    return pool.query("INSERT INTO chats VALUES(NULL) RETURNING *")
   }).then((result) => {
     newChatId = result.rows.chat_id;
     values = []
@@ -818,12 +829,15 @@ io.on("connection", async (socket) => {
   let pathParts = url.split("/");
   let chatId = pathParts[pathParts.length - 1];
 
-
-  let cookies = cookie.parse(socket.handshake.headers.cookie);
+  try {
+    let cookies = cookie.parse(socket.handshake.headers.cookie);
+  } catch {
+  }
+  
   try {
     socket.data.userId = await getUserId(cookies.token);
   } catch {
-    socket.disconnect();
+    // socket.disconnect();
   }
   
   if (invalidChatId(chatId)) {
@@ -843,8 +857,7 @@ io.on("connection", async (socket) => {
       socket.to(chatId).emit("sent message", {"message": message});
     }).catch(error => {
       console.log(error);
-    })
-    
+    });
   });
 });
 
