@@ -5,7 +5,18 @@ let chatHistory = {};
 
 let socket = io();
 let chatIdString = window.location.pathname.split("/").pop();
+let chatBox = document.getElementById("chat-box");
 
+
+fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
+  return response.json();
+}).then((body) => {
+  for( let messageObject of body.messages) {
+    let element = createMessageElement(messageObject.chat_message, messageObject.sender_id);
+    chatBox.appendChild(element);
+    chatBox.scrollTo(0, chatBox.scrollHeight);
+  }
+});
 
 let input = document.getElementById("chat-message");
 input.addEventListener("keypress", (event) => {
@@ -109,6 +120,7 @@ function createMessageElement(message, sender) {
 }
 
 socket.on('sent message', function ({message, sender}) {
+    const chatBox = document.getElementById("chat-box");
     let element = createMessageElement(message, sender);
     chatBox.appendChild(element);
     chatBox.scrollTo(0, chatBox.scrollHeight);
