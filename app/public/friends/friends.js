@@ -7,16 +7,17 @@ let socket = io();
 let chatIdString = window.location.pathname.split("/").pop();
 let chatBox = document.getElementById("chat-box");
 
-
-fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
-  return response.json();
-}).then((body) => {
-  for( let messageObject of body.messages) {
-    let element = createMessageElement(messageObject.chat_message, messageObject.sender_id);
-    chatBox.appendChild(element);
-    chatBox.scrollTo(0, chatBox.scrollHeight);
-  }
-});
+function getChatMessages(chatIdString) {
+    fetch(`/chat-messages?chatId=${chatIdString}`).then((response) => {
+    return response.json();
+    }).then((body) => {
+        for( let messageObject of body.messages) {
+            let element = createMessageElement(messageObject.chat_message, messageObject.sender_id);
+            chatBox.appendChild(element);
+            chatBox.scrollTo(0, chatBox.scrollHeight);
+        }
+    });
+}
 
 let input = document.getElementById("chat-message");
 input.addEventListener("keypress", (event) => {
@@ -86,12 +87,13 @@ function acceptFriendRequest(username) {
 function selectFriend(friend) {
     const chatBox = document.getElementById("chat-box");
     chatBox.innerHTML = `<h4>Chatting with ${friend}</h4>`;
-    if (!chatHistory[friend]) chatHistory[friend] = [];
-    chatHistory[friend].forEach(message => {
-        const p = document.createElement("p");
-        p.textContent = message;
-        chatBox.appendChild(p);
-    });
+    // if (!chatHistory[friend]) chatHistory[friend] = [];
+    // chatHistory[friend].forEach(message => {
+    //     const p = document.createElement("p");
+    //     p.textContent = message;
+    //     chatBox.appendChild(p);
+    // });
+    getChatMessages(chatIdString);
 }
 
 function sendMessage() {
