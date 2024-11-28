@@ -19,9 +19,9 @@ CREATE TABLE friend_requests (
 );
 
 CREATE TABLE friendships (
-    user1_id INTEGER REFERENCES group_sessions(group_id) ON DELETE CASCADE,
+    user1_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     user2_id INTEGER REFERENCES users(user_id),
-    PRIMARY KEY (group_id, user_id)
+    PRIMARY KEY (user1_id, user2_id)
 );
 
 
@@ -102,3 +102,5 @@ CREATE TABLE chat_messages(
 );
 
 INSERT INTO chat_messages(chat_id, chat_message, sent_date) VALUES (1, 'Filler text for setup', '2024-11-12 18:57:25');
+
+INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2);
