@@ -885,18 +885,27 @@ io.on("connection", async (socket) => {
   if (invalidChatId(chatId)) {
     return;
   }
+  socket.data.currentChatId = chatId;
   socket.join(chatId);
+  
 
   socket.on("disconnect", () => {
     console.log(`Socket ${socket.id} disconnected`);
   });
+
+  socket.on("join", ({chatId}) => {
+    chatId = chatId.toString();
+    socket.leave(socket.data.currentChatId);
+    socket.data.currentChatId = chatId;
+    socket.join(chatId);
+  })
 
   socket.on("send message", ({ message }) => {
     pool.query(
       "INSERT INTO chat_messages(chat_id, sender_id ,chat_message, sent_date) VALUES($1, $2, $3, $4) RETURNING *",
       [chatId, socket.data.userId ,message, new Date(new Date().toISOString())]
     ).then((result) => {
-      socket.to(chatId).emit("sent message", {"message": message});
+      socket.to(socket.data.currentChatId).emit("sent message", {"message": message});
     }).catch(error => {
       console.log(error);
     });

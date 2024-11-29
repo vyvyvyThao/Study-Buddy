@@ -118,6 +118,8 @@ function selectFriend(friend) {
     // });
     if (friend.chat_id) {
         history.pushState(".","", `/friends/${friend.chat_id}`)
+        socket.emit("join", {"chatId": friend.chat_id})
+        // window.location.href = `/friends/${friend.chat_id}`
         let chatIdString = getChatId();
         getChatMessages(chatIdString);
     } else {
@@ -130,8 +132,10 @@ function selectFriend(friend) {
         }).then((response) => {
             return response.json();
         }).then((body) => {
-            history.pushState(".", "", `/friends/${body.chatId}`)
             friend.chat_id = body.chatId;
+            history.pushState(".", "", `/friends/${body.chatId}`)
+            socket.emit("join", {"chatId": body.chatId})
+            // window.location.href = `/friends/${body.chatId}`
             let chatIdString = getChatId();
             getChatMessages(chatIdString);
         }).catch()
