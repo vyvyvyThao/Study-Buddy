@@ -76,7 +76,7 @@ async function populateFriendList() {
         li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
-        if (chatId === friend.chat_id.toString()){
+        if (chatId && chatId === friend.chat_id.toString()){
             selectFriend(friend);
         }
     });
