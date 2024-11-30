@@ -366,9 +366,6 @@ app.get("/tasks", authorize, (req, res) => {
 })
 
 app.post("/task/add", authorize, (req, res) => {
-  let auth = req.headers["Authorization"];
-  console.log(auth);
-
   let body = req.body;
   if (
     !body.hasOwnProperty("title") ||
@@ -382,6 +379,8 @@ app.post("/task/add", authorize, (req, res) => {
   let due = body.due;
   let progress = body.progress;  // done or not
   let creatorId = currUser.user_id;
+
+  console.log("Read in: ", title, due);
 
   let creatorExist = true;
   let today = new Date();

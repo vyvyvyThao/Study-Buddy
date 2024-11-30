@@ -33,6 +33,12 @@ document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
     document.getElementById("sidebar").classList.toggle("show-sidebar");
 });
 
+let onClickOutside = (element, callback) => {
+    document.addEventListener('click', e => {
+      if (!element.contains(e.target)) callback();
+    });
+  };
+
 function startTimer(button) {
     const widget = button.parentElement;
     const hours = parseInt(widget.querySelector('.hoursInput').value) || 0;
@@ -112,30 +118,38 @@ function addTask(button) {
             `;
     ul.appendChild(newTask);
 
-    let taskTitle = document.getElementById('task-title');
-    let dueDateInput = document.getElementById('due');
 
-    console.log(taskTitle.value);
-    console.log(dueDateInput.value);
+    onClickOutside(document.getElementById('workspace').children[0], function() {
+        let taskTitle = document.getElementById('task-title');
+        let dueDateInput = document.getElementById('due');
 
-    fetch("task/add", {
-        method: "POST",
-    
-        body: JSON.stringify({
-            title: taskTitle.value,
-            due: dueDateInput.value,
-            progress: false
+        console.log(taskTitle.value);
+        console.log(dueDateInput.value);
+
+        fetch("task/add", {
+            method: "POST",
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        
+            body: JSON.stringify({
+                title: taskTitle.value,
+                due: dueDateInput.value,
+                progress: false
+            })
         })
+        
+        .then(response => {
+            return response.body;
+        }).then(body => {
+            console.log(body);
+        }).catch(error => {
+            console.log(error);
+        });
+        console.log("Sent request POST /task/add"); 
     })
-    
-    .then(response => {
-        return response.body;
-    }).then(body => {
-        console.log(body);
-    }).catch(error => {
-        console.log(error);
-    });
-    console.log("Sent request POST /task/add"); 
 }
 
 function makeDraggable(element) {
@@ -209,6 +223,7 @@ function createWidget(type) {
                 console.log(row);
                 let due_date = row.due.split("T")[0];
                 if (row.progress) {
+                    // Reminder: All completed tasks are removed from db after checking the box
                     html_str += `<tr class="task-done" id="${row.id}">`;
                     html_str += `<td><input type="checkbox" checked/></td>`;
                     html_str += `<td>${row.title}</td>`;
@@ -216,14 +231,33 @@ function createWidget(type) {
                     html_str += "</tr>";
                 } else {
                     html_str += `<tr id="${row.id}">`;
-                    html_str += `<td><input type="checkbox"/></td>`;
-                    html_str += `<td>${row.title}</td>`;
-                    html_str += `<td>due ${due_date}</td>`;
+                    html_str += `<td><input type="checkbox" id="progress"/></td>`;
+                    html_str += `<td id="title">${row.title}</td>`;
+                    html_str += `<td id="due">due ${due_date}</td>`;
                     html_str += "</tr>";
                 }
             }
             html_str += "</table>"
             taskList.innerHTML = html_str;
+
+            for (let i = 0; i < taskRows.length; i++) {
+                let progress;
+            
+                row = taskRows[i];
+                for (let child of document.getElementById(row.id).children) {
+                    if (child.id == "progress") {
+                        progress = child;
+                    }
+
+                    progress.addEventListener("click", function() {
+                        row.classList.add("task-done");
+                    })
+                }
+
+                // TO-DO: send DELETE REQUEST (Tasks done is shown before reloading or closing window)
+            }
+
+
         }).catch(error => {
             console.log(error);
         });
