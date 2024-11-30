@@ -69,12 +69,16 @@ async function populateFriendList() {
             return temp
         })
     } catch {}
+    let chatId = getChatId();
 
     friends.forEach(friend => {
         const li = document.createElement("li");
         li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
+        if (chatId && chatId === friend.chat_id.toString()){
+            selectFriend(friend);
+        }
     });
 }
 
