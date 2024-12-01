@@ -65,7 +65,7 @@ async function populateFriendList() {
             let temp = [];
             body.forEach((item) => {
                 console.log(item);
-                if (item.accepted) {
+                if (item.user_accepted && item.friend_accepted) {
                     temp.push(item);
                 }
             })
@@ -96,7 +96,7 @@ async function populateFriendRequests() {
             let temp = [];
             body.forEach((item) => {
                 console.log(item);
-                if (!item.accepted) {
+                if (!item.user_accepted && item.friend_accepted) {
                     temp.push(item);
                 }
             })

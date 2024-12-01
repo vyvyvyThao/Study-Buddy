@@ -478,9 +478,9 @@ app.post("/friends/request", authorize, (req, res) => {
 app.get("/friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
   pool.query(
-    `SELECT friend_id, accepted, username, chat_id FROM
-    (SELECT user2_id as friend_id, user2_accepted as accepted FROM friendships WHERE user1_id = $1 
-    UNION SELECT user1_id as friend_id, user1_accepted as accepted FROM friendships WHERE user2_id = $1) AS t1
+    `SELECT friend_id, friend_accepted, user_accepted, username, chat_id FROM
+    (SELECT user2_id as friend_id, user2_accepted as friend_accepted, user1_accepted as user_accepted FROM friendships WHERE user1_id = $1 
+    UNION SELECT user1_id as friend_id, user1_accepted as friend_accepted, user2_accepted as user_accepted FROM friendships WHERE user2_id = $1) AS t1
     LEFT JOIN users ON t1.friend_id=users.user_id LEFT JOIN user_chat ON t1.friend_id = user_chat.user_id`
     , [userId]
   ).then((results) => {
