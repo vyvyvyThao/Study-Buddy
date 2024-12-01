@@ -24,6 +24,7 @@ const hostname = "localhost";
 const env = require("../env.json");
 const { create } = require("domain");
 const { error } = require("console");
+const { console } = require("inspector");
 const Pool = pg.Pool;
 const pool = new Pool(env);
 
@@ -436,8 +437,8 @@ app.post("/friends/request", authorize, (req, res) => {
         } else {
           console.log("Getting id: ", result.rows[0].user_id);
           friend_id = result.rows[0].user_id;
-          console.log(currUser.username, ": ", currUser.user_id);
-          console.log(username, ": ", friend_id);
+          // console.log(currUser.username, ": ", currUser.user_id);
+          // console.log(username, ": ", friend_id);
 
           
           if (currUser.user_id == friend_id) {
@@ -445,18 +446,22 @@ app.post("/friends/request", authorize, (req, res) => {
 
           } else {
             let user1_id = currUser.user_id;
+            let user1_accepted = true;
             let user2_id = friend_id;
+            let user2_accepted = false;
             if (currUser.user_id > body.user_id) {
               user1_id = friend_id;
+              user1_accepted = false;
               user2_id = currUser.user_id;
+              user2_accepted = true;
             }
 
             pool.query(
-              `INSERT INTO friendships(user1_id, user2_id, pending)
-              VALUES($1, $2, $3)
+              `INSERT INTO friendships(user1_id, user2_id, user1_accepted, user2_accepted)
+              VALUES($1, $2, $3, $4)
               on conflict do nothing
               RETURNING *`,
-              [user1_id, user2_id, true],
+              [user1_id, user2_id, user1_accepted, user2_accepted],
             )
             .then((result) => {
             })
@@ -473,9 +478,9 @@ app.post("/friends/request", authorize, (req, res) => {
 app.get("/friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
   pool.query(
-    `SELECT friend_id, username, chat_id FROM
-    (SELECT user2_id as friend_id FROM friendships WHERE user1_id = $1 
-    UNION SELECT user1_id as friend_id FROM friendships WHERE user2_id = $1) AS t1
+    `SELECT friend_id, accepted, username, chat_id FROM
+    (SELECT user2_id as friend_id, user2_accepted as accepted FROM friendships WHERE user1_id = $1 
+    UNION SELECT user1_id as friend_id, user1_accepted as accepted FROM friendships WHERE user2_id = $1) AS t1
     LEFT JOIN users ON t1.friend_id=users.user_id LEFT JOIN user_chat ON t1.friend_id = user_chat.user_id`
     , [userId]
   ).then((results) => {
@@ -485,7 +490,8 @@ app.get("/friends/list", authorize, async (req, res) => {
   });
 });
 
-app.patch("friends/accept", (req, res) => {
+app.patch("/friends/accept", (req, res) => {
+  console.log("receving request");
   let body = req.body; // {friend_username: "some_username"}
   let friend_id;
 
@@ -498,8 +504,7 @@ app.patch("friends/accept", (req, res) => {
     } else {
       console.log("Getting id: ", result.rows[0].user_id);
       friend_id = result.rows[0].user_id;
-      console.log(currUser.username, ": ", currUser.user_id);
-      console.log(username, ": ", friend_id);
+      console.log(friend_id);
 
       if (currUser.user_id == friend_id) {
         res.status(400).json({error: "Cannot make yourself a friends."});
@@ -518,6 +523,7 @@ app.patch("friends/accept", (req, res) => {
         SET pending = false
         WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
       .then((results) => {
+        console.log(results.rows);
         return res.status(200).json(results.rows)
       }).catch(error => {
         console.log(error);

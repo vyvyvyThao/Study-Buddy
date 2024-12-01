@@ -15,7 +15,8 @@ CREATE TABLE users (
 CREATE TABLE friendships (
     user1_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     user2_id INTEGER REFERENCES users(user_id),
-    pending BOOLEAN,
+    user1_accepted BOOLEAN,
+    user2_accepted BOOLEAN,
     PRIMARY KEY (user1_id, user2_id)
 );
 
@@ -104,4 +105,4 @@ VALUES
 (1, 2, 'Filler text for setup by test2', '2024-11-12 18:57:25'),
 (1, 1, 'Filler text for setup by test', '2024-11-12 18:57:25');
 
-INSERT INTO friendships(user1_id, user2_id, pending) VALUES (1, 2, false), (1,4, false), (2,3, false), (2,4, false);
+INSERT INTO friendships(user1_id, user2_id, user1_accepted, user2_accepted) VALUES (1, 2, true, true), (1,4, true, true), (2,3, true, true), (2,4, true, true);

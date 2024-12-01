@@ -64,7 +64,10 @@ async function populateFriendList() {
         }).then((body) => {
             let temp = [];
             body.forEach((item) => {
-                temp.push(item);
+                console.log(item);
+                if (item.accepted) {
+                    temp.push(item);
+                }
             })
             return temp
         })
@@ -82,15 +85,32 @@ async function populateFriendList() {
     });
 }
 
-function populateFriendRequests() {
+async function populateFriendRequests() {
     const requestsList = document.getElementById("friend-requests");
     requestsList.innerHTML = "";
+
+    try{
+        friendRequests = await fetch(`/friends/list`).then((response) => {
+            return response.json();
+        }).then((body) => {
+            let temp = [];
+            body.forEach((item) => {
+                console.log(item);
+                if (!item.accepted) {
+                    temp.push(item);
+                }
+            })
+            return temp
+        })
+    } catch {}
+
     friendRequests.forEach(request => {
+        console.log(request);
         const li = document.createElement("li");
-        li.textContent = request;
+        li.textContent = request.username;
         const acceptButton = document.createElement("button");
         acceptButton.textContent = "Accept";
-        acceptButton.onclick = () => acceptFriendRequest(request);
+        acceptButton.onclick = () => acceptFriendRequest(request.username);
         li.appendChild(acceptButton);
         requestsList.appendChild(li);
     });
@@ -128,8 +148,35 @@ function sendFriendRequest() {
 }
 
 function acceptFriendRequest(username) {
-    friends.push(username);
-    friendRequests.splice(friendRequests.indexOf(username), 1);
+    // friends.push(username);
+    // friendRequests.splice(friendRequests.indexOf(username), 1);
+    console.log("Changing pending status for", username);
+
+    if (username) {
+        fetch("accept", {
+            method: "PATCH",
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        
+            body: JSON.stringify({
+                friend_username: username
+            })
+        })
+        
+        .then(response => {
+            return response.body;
+        }).then(body => {
+            console.log(body);
+        }).catch(error => {
+            console.log(error);
+        });
+
+        document.getElementById("friend-username").value = "";
+    }
+
     populateFriendList();
     populateFriendRequests();
 }
