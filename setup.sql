@@ -12,15 +12,10 @@ CREATE TABLE users (
     last_login TIMESTAMP
 );
 
-CREATE TABLE friend_requests (
-    request_id SERIAL PRIMARY KEY,
-    sender_id INTEGER REFERENCES users(user_id),
-    user_id INTEGER REFERENCES users(user_id)
-);
-
 CREATE TABLE friendships (
     user1_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     user2_id INTEGER REFERENCES users(user_id),
+    pending BOOLEAN,
     PRIMARY KEY (user1_id, user2_id)
 );
 
@@ -109,4 +104,4 @@ VALUES
 (1, 2, 'Filler text for setup by test2', '2024-11-12 18:57:25'),
 (1, 1, 'Filler text for setup by test', '2024-11-12 18:57:25');
 
-INSERT INTO friendships(user1_id, user2_id) VALUES (1, 2), (1,4), (2,3), (2,4);
+INSERT INTO friendships(user1_id, user2_id, pending) VALUES (1, 2, false), (1,4, false), (2,3, false), (2,4, false);

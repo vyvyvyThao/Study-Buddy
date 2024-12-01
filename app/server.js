@@ -421,52 +421,53 @@ app.post("/task/add", authorize, (req, res) => {
   res.send();
 });
 
-app.post("friends/request", (req, res) => {
-  let body = req.body; // {user_id}
 
-  if (currUser.user_id == body.user_id) {
-    res.status(400).json({error: "Cannot send request to yourself."});
-  }
+app.post("/friends/request", authorize, (req, res) => {
+  let body = req.body; // {friend_username: "some username"}
+  let username = body.friend_username;
+  let friend_id;
 
-  pool.query(`SELECT * FROM friend_requests WHERE sender_id = $1 AND user_id = $2`, [currUser.user_id, body.user_id]).then(result => {
-    if (length(result.rows) != 0) {
-      res.status(400).json({error: "Request has already been sent."});
-    }
-    res.json({rows: result.rows});
-  })
-  .catch(error => {
-    console.error("error:", error);
-  });  
+  pool.query(`SELECT user_id FROM users WHERE username = $1`, [username])
+      .then(result => {
+        console.log(result.rows);
+        if (result.rows.length == 0) {
+          denied = true;
+          res.status(400).json({error: 'user does not exist'});
+        } else {
+          console.log("Getting id: ", result.rows[0].user_id);
+          friend_id = result.rows[0].user_id;
+          console.log(currUser.username, ": ", currUser.user_id);
+          console.log(username, ": ", friend_id);
 
-  let user1_id = currUser.user_id;
-  let user2_id = body.user_id
-  if (currUser.user_id > body.user_id) {
-    user1_id = body.user_id;
-    user2_id = currUser.user_id;
-  }
+          
+          if (currUser.user_id == friend_id) {
+            res.status(400).json({error: "Cannot send request to yourself."});
 
-  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id]).then(result => {
-    if (length(result.rows) != 0) {
-      res.status(400).json({error: "2 users are already friends."});
-    }
-  })
-  .catch(error => {
-    console.error("error:", error);
-  });  
+          } else {
+            let user1_id = currUser.user_id;
+            let user2_id = friend_id;
+            if (currUser.user_id > body.user_id) {
+              user1_id = friend_id;
+              user2_id = currUser.user_id;
+            }
 
-  pool.query(
-    `INSERT INTO friend_requests(sender_id, user_id)
-    VALUES($1, $2, $3)
-    RETURNING *`,
-    [body.sender_id, body.user_id],
-  )
-  .then((result) => {
-    console.log("Success");
-  })
-  .catch((error) => {
-    console.log(error);
-    return res.status(500).send();
-  })
+            pool.query(
+              `INSERT INTO friendships(user1_id, user2_id, pending)
+              VALUES($1, $2, $3)
+              on conflict do nothing
+              RETURNING *`,
+              [user1_id, user2_id, true],
+            )
+            .then((result) => {
+            })
+            .catch((error) => {
+              console.log(error);
+              return res.status(500).send();
+            })
+          }
+        }
+      })
+
 });
 
 app.get("/friends/list", authorize, async (req, res) => {
@@ -484,77 +485,44 @@ app.get("/friends/list", authorize, async (req, res) => {
   });
 });
 
-app.post("friends/update", (req, res) => {
-  let body = req.body;  // {user_id, accept}
+app.patch("friends/accept", (req, res) => {
+  let body = req.body; // {friend_username: "some_username"}
+  let friend_id;
 
-  if (currUser.user_id == body.user_id) {
-    res.status(400).json({error: "Cannot make yourself a friends."});
-  }
-
-  let user1_id = currUser.user_id;
-  let user2_id = body.user_id
-
-  if (currUser.user_id > body.user_id) {
-    user1_id = body.user_id;
-    user2_id = currUser.user_id;
-  }
-
-  let friendshipList;
-
-  pool.query(`SELECT * FROM friendships WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
+  pool.query(`SELECT user_id FROM users WHERE username = $1`, [body.friend_username])
   .then(result => {
-    friendshipList = result.rows;
-  })
-  .catch(error => {
-    console.error("error:", error);
-  });  
+    console.log(result.rows);
+    if (result.rows.length == 0) {
+      res.status(404).json({error: 'user does not exist'});
 
-  if (length(friendshipList) != 0) {
-    // accepting friend request and friendship already exists => error
-    if (req.body.accept) {
-      res.status(400).json({error: "2 users are already friends."});
-    
-    // unfriend
     } else {
-      pool.query(
-        `DELETE FROM friendships WHERE user1_id = $1 AND user2_id = $2`,
-        [user1_id, user2_id]
-      )
-      .then((result) => {
-        res.status(204);
-      })
-      .catch((error) => {
+      console.log("Getting id: ", result.rows[0].user_id);
+      friend_id = result.rows[0].user_id;
+      console.log(currUser.username, ": ", currUser.user_id);
+      console.log(username, ": ", friend_id);
+
+      if (currUser.user_id == friend_id) {
+        res.status(400).json({error: "Cannot make yourself a friends."});
+      }
+
+      let user1_id = currUser.user_id;
+      let user2_id = friend_id;
+
+      if (currUser.user_id > body.user_id) {
+        user1_id = friend_id;
+        user2_id = currUser.user_id;
+      }
+
+      pool.query(`
+        UPDATE friendships
+        SET pending = false
+        WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
+      .then((results) => {
+        return res.status(200).json(results.rows)
+      }).catch(error => {
         console.log(error);
-        return res.status(500).send();
-      })
+      });
     }
-  }
-
-  // accept friend request if friendship does not exist
-  if (req.body.accept) {
-    pool.query(
-      `INSERT INTO friendships(user1_id, user2_id)
-      VALUES($1, $2)
-      RETURNING *`,
-      [user1_id, user2_id],
-    )
-    .then((result) => {
-      res.status(201);
-    })
-    .catch((error) => {
-      console.log(error);
-      return res.status(500).send();
-    })
-  }
-
-  // remove friend request
-  pool.query(
-    `DELETE FROM friend_requests WHERE sender_id = $1 AND user_id = $2`,
-    [body.sender_id, body.user_id],
-  )
-  .catch((error) => {
-    console.log(error);
-    return res.status(500).send();
   })
 });
 

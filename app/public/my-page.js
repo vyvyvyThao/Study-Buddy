@@ -123,8 +123,8 @@ function addTask(button) {
         let taskTitle = document.getElementById('task-title');
         let dueDateInput = document.getElementById('due');
 
-        console.log(taskTitle.value);
-        console.log(dueDateInput.value);
+        // console.log(taskTitle.value);
+        // console.log(dueDateInput.value);
 
         fetch("task/add", {
             method: "POST",

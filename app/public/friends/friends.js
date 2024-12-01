@@ -98,8 +98,31 @@ function populateFriendRequests() {
 
 function sendFriendRequest() {
     const username = document.getElementById("friend-username").value;
+
     if (username) {
+        fetch("request", {
+            method: "POST",
+
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        
+            body: JSON.stringify({
+                friend_username: username
+            })
+        })
+        
+        .then(response => {
+            return response.body;
+        }).then(body => {
+            console.log(body);
+        }).catch(error => {
+            console.log(error);
+        });
+        console.log("Sent request POST /friends/request");
         alert(`Friend request sent to ${username}`);
+
         document.getElementById("friend-username").value = "";
     }
 }
