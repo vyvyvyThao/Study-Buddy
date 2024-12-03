@@ -145,7 +145,7 @@ function addTask(button) {
     newTask.innerHTML = `<ul id="taskList">
                 <input type="checkbox"><input type="text" class="task-title" placeholder="New Task">
                 <label for="date" placeholder="MM-DD-YYYY">Due date:</label>
-                <input type="date" class="due">
+                <input type="date" class="input-due">
             </ul>
             `;
     ul.appendChild(newTask);
@@ -154,7 +154,7 @@ function addTask(button) {
 
     onClickOutside(document.getElementById('workspace').children[count - 1], function() {
         let taskTitle = document.querySelector('.task-title');
-        let dueDateInput = document.querySelector('.due');
+        let dueDateInput = document.querySelector('.input-due');
 
         console.log(taskTitle.value);
         console.log(dueDateInput.value);
@@ -212,9 +212,32 @@ function strike(id, checkbox) {
     if (checkbox.checked) {
         row.style.textDecoration = "line-through";
         // TO-DO: Send patch request
+        fetch("task/update", {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            },
+            method: "PATCH",
+
+            body: JSON.stringify({
+                title: title,
+                progress: true
+            })
+        })
     } else {
-        row.style.textDecoration = "";
-        // TO-DO: Send patch request
+        row.style.textDecoration = "none";
+        fetch("task/update", {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            },
+            method: "PATCH",
+
+            body: JSON.stringify({
+                title: title,
+                progress: false
+            })
+        })
     }
 }
 
@@ -271,9 +294,9 @@ function createWidget(type) {
                 if (row.progress) {
                     // Reminder: All completed tasks are removed from db after checking the box
                     html_str += `<tr class="task-done" id="${row.id}">`;
-                    html_str += `<td><input type="checkbox" checked/></td>`;
-                    html_str += `<td>${row.title}</td>`;
-                    html_str += `<td>due ${due_date}</td>`;
+                    html_str += `<td><input type="checkbox" checked onClick="strike(${row.id}, this)"/></td>`;
+                    html_str += `<td class="title">${row.title}</td>`;
+                    html_str += `<td class="due">due ${due_date}</td>`;
                     html_str += "</tr>";
                 } else {
                     html_str += `<tr id="${row.id}">`;

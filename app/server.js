@@ -410,6 +410,21 @@ app.post("/task/add", authorize, (req, res) => {
   res.send();
 });
 
+app.patch("/task/update", authorize, (req, res) => {
+  console.log("Updating task");
+  let body = req.body;  // {title, progress}
+
+  pool.query(`
+    UPDATE tasks
+    SET progress = $1
+    WHERE title = $2`, [body.progress, body.title])
+  .then((results) => {
+    console.log(results.rows);
+    return res.status(200).json(results.rows)
+  }).catch(error => {
+    console.log(error);
+  });
+})
 
 app.post("/friends/request", authorize, (req, res) => {
   let body = req.body; // {friend_username: "some username"}
@@ -437,7 +452,8 @@ app.post("/friends/request", authorize, (req, res) => {
             let user1_accepted = true;
             let user2_id = friend_id;
             let user2_accepted = false;
-            if (currUser.user_id > body.user_id) {
+            
+            if (currUser.user_id > friend_id) {
               user1_id = friend_id;
               user1_accepted = false;
               user2_id = currUser.user_id;
@@ -498,24 +514,26 @@ app.patch("/friends/accept", authorize, (req, res) => {
         res.status(400).json({error: "Cannot make yourself a friends."});
       }
 
-      let user1_id = currUser.user_id;
-      let user2_id = friend_id;
-
-      if (currUser.user_id > body.user_id) {
-        user1_id = friend_id;
-        user2_id = currUser.user_id;
+      else {
+        let user1_id = currUser.user_id;
+        let user2_id = friend_id;
+  
+        if (currUser.user_id > friend_id) {
+          user1_id = friend_id;
+          user2_id = currUser.user_id;
+        }
+  
+        pool.query(`
+          UPDATE friendships
+          SET user1_accepted = true, user2_accepted = true
+          WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
+        .then((results) => {
+          console.log(results.rows);
+          return res.status(200).json(results.rows)
+        }).catch(error => {
+          console.log(error);
+        });
       }
-
-      pool.query(`
-        UPDATE friendships
-        SET pending = false
-        WHERE user1_id = $1 AND user2_id = $2`, [user1_id, user2_id])
-      .then((results) => {
-        console.log(results.rows);
-        return res.status(200).json(results.rows)
-      }).catch(error => {
-        console.log(error);
-      });
     }
   })
 });
