@@ -321,33 +321,20 @@ app.get("/notes", authorize, (req, res) => {
 
 app.post("/notes/add", authorize, (req, res) => {
   let body = req.body;
-  console.log("request user id:", req.body.creatorId);
-  if (
-    !body.hasOwnProperty("content") ||
-    !body.hasOwnProperty("creatorId")
-  ) {
+
+  if (!body.hasOwnProperty("content")) {
     return res.status(404);
   }
-
-  let creatorExist = true;
-  pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [body.creatorId])
-  .then(result => {
-    // console.log(result.rows);
-    if (result.rows.length == 0) {
-      creatorExist = false;
-      res.status(400).json({error: 'user does not exist'});
-    }
-  })
     
   pool.query(
     `INSERT INTO notes(content, creator_id) 
     VALUES($1, $2)
     RETURNING *`,
-    [body.content, body.creatorId],
+    [body.content, currUser.user_id],
   )
   .then((result) => {
-    // console.log("Inserted:");
-    // console.log(result.rows);
+    console.log("Inserted:");
+    console.log(result.rows);
   })
   .catch((error) => {
     res.status(500);
@@ -408,6 +395,7 @@ app.post("/task/add", authorize, (req, res) => {
     .query(
       `INSERT INTO tasks(title, due, progress, creator_id) 
       VALUES($1, $2, $3, $4)
+      on conflict do nothing
       RETURNING *`,
       [title, due, progress, creatorId],
     )
@@ -490,7 +478,7 @@ app.get("/friends/list", authorize, async (req, res) => {
   });
 });
 
-app.patch("/friends/accept", (req, res) => {
+app.patch("/friends/accept", authorize, (req, res) => {
   console.log("receving request");
   let body = req.body; // {friend_username: "some_username"}
   let friend_id;

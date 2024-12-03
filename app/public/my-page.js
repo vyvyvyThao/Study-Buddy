@@ -87,9 +87,41 @@ function updateTimerDisplay(widget) {
 function addNote() {
     const note = document.createElement("div");
     note.classList.add("widget", "note");
-    note.innerHTML = `<textarea placeholder="Write your note here..."></textarea>`;
+    
+    note.innerHTML = `<input type="text" class="content" placeholder="Write your note here...">`;
     makeDraggable(note);
     document.getElementById("workspace").appendChild(note);
+
+    let count = document.getElementById('workspace').children.length;
+
+
+    onClickOutside(document.getElementById('workspace').children[count - 1], function() {
+        let contentInput = document.querySelector('.content');
+
+        console.log(contentInput.value);
+
+        // fetch("notes/add", {
+        //     method: "POST",
+
+        //     headers: {
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     },
+        
+        //     body: JSON.stringify({
+        //         content: contentInput.value
+        //     })
+        // })
+        
+        // .then(response => {
+        //     return response.body;
+        // }).then(body => {
+        //     console.log(body);
+        // }).catch(error => {
+        //     console.log(error);
+        // });
+        // console.log("Sent request POST /notes/add"); 
+    })
 }
 
 function addTaskList() {
@@ -111,20 +143,21 @@ function addTask(button) {
     const ul = button.previousElementSibling;
     const newTask = document.createElement("div");
     newTask.innerHTML = `<ul id="taskList">
-                <input type="checkbox"><input type="text" id="task-title" placeholder="New Task">
+                <input type="checkbox"><input type="text" class="task-title" placeholder="New Task">
                 <label for="date" placeholder="MM-DD-YYYY">Due date:</label>
-                <input type="date" id="due">
+                <input type="date" class="due">
             </ul>
             `;
     ul.appendChild(newTask);
 
+    let count = document.getElementById('workspace').children.length;
 
-    onClickOutside(document.getElementById('workspace').children[0], function() {
-        let taskTitle = document.getElementById('task-title');
-        let dueDateInput = document.getElementById('due');
+    onClickOutside(document.getElementById('workspace').children[count - 1], function() {
+        let taskTitle = document.querySelector('.task-title');
+        let dueDateInput = document.querySelector('.due');
 
-        // console.log(taskTitle.value);
-        // console.log(dueDateInput.value);
+        console.log(taskTitle.value);
+        console.log(dueDateInput.value);
 
         fetch("task/add", {
             method: "POST",
@@ -170,6 +203,19 @@ function makeDraggable(element) {
             document.onmouseup = null;
         };
     };
+}
+
+function strike(id, checkbox) {
+    let row =  document.getElementById(id);
+    let title = row.querySelector('.title').textContent;
+    let due = row.querySelector('.due').textContent;
+    if (checkbox.checked) {
+        row.style.textDecoration = "line-through";
+        // TO-DO: Send patch request
+    } else {
+        row.style.textDecoration = "";
+        // TO-DO: Send patch request
+    }
 }
 
 function createWidget(type) {
@@ -231,31 +277,14 @@ function createWidget(type) {
                     html_str += "</tr>";
                 } else {
                     html_str += `<tr id="${row.id}">`;
-                    html_str += `<td><input type="checkbox" id="progress"/></td>`;
-                    html_str += `<td id="title">${row.title}</td>`;
-                    html_str += `<td id="due">due ${due_date}</td>`;
+                    html_str += `<td><input type="checkbox" id="progress" onClick="strike(${row.id}, this)"/></td>`;
+                    html_str += `<td class="title">${row.title}</td>`;
+                    html_str += `<td class="due">due ${due_date}</td>`;
                     html_str += "</tr>";
                 }
             }
             html_str += "</table>"
             taskList.innerHTML = html_str;
-
-            for (let i = 0; i < taskRows.length; i++) {
-                let progress;
-            
-                row = taskRows[i];
-                for (let child of document.getElementById(row.id).children) {
-                    if (child.id == "progress") {
-                        progress = child;
-                    }
-
-                    progress.addEventListener("click", function() {
-                        row.classList.add("task-done");
-                    })
-                }
-
-                // TO-DO: send DELETE REQUEST (Tasks done is shown before reloading or closing window)
-            }
 
 
         }).catch(error => {
