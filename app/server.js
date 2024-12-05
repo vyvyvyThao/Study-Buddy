@@ -609,6 +609,39 @@ app.post("/session/create", authorize, (req, res) => {
 
 })
 
+app.post("/session/member", authorize, (req, res) => {
+  let body = req.body;   // {group_id, user_id}
+
+  if (
+    !body.hasOwnProperty("group_id") ||
+    !body.hasOwnProperty("user_id")
+  ) {
+    return res.status(404).json({error: "Missing required fields"});
+  }
+
+  pool.query(`SELECT * FROM group_memberships WHERE user_id = $1 AND group_id = $2`, [currUser.user_id, body.group_id]).then(result => {
+    if (result.rowCount == 0) {
+      res.status(403).json({error: "You do not have permission to modify this group study session"});
+    } else {
+      pool.query(`INSERT INTO group_memberships(group_id, user_id)
+        VALUES($1, $2)
+        on conflict do nothing
+        RETURNING *`,
+        [body.group_id, body.user_id],
+      )
+      .then((result) => {})
+      .catch((error) => {
+        console.log(error);
+        return res.status(500).send();
+      })
+    }
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+})
+
 
 function invalidChatId(chatId) {
   chatIdValue = parseInt(chatId)
