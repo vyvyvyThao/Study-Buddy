@@ -298,7 +298,7 @@ app.post("/logout", (req, res) => {
   );
   console.log("deleted token");
 
-  return res.clearCookie("token", cookieOptions).send();
+  return res.clearCookie("token", cookieOptions).json({"url": "/index.html"});
 
 })
 
