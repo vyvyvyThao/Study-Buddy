@@ -365,7 +365,7 @@ app.post("/task/add", authorize, (req, res) => {
 
   let title = body.title;
   let due = body.due;
-  let progress = body.progress;  // done or not
+  let progress = body.progress;
   let creatorId = currUser.user_id;
 
   console.log("Read in: ", title, due);
@@ -412,7 +412,7 @@ app.post("/task/add", authorize, (req, res) => {
 
 app.patch("/task/update", authorize, (req, res) => {
   console.log("Updating task");
-  let body = req.body;  // {title, progress}
+  let body = req.body;
 
   pool.query(`
     UPDATE tasks
@@ -427,7 +427,7 @@ app.patch("/task/update", authorize, (req, res) => {
 })
 
 app.post("/friends/request", authorize, (req, res) => {
-  let body = req.body; // {friend_username: "some username"}
+  let body = req.body;
   let username = body.friend_username;
   let friend_id;
 
@@ -440,9 +440,6 @@ app.post("/friends/request", authorize, (req, res) => {
         } else {
           console.log("Getting id: ", result.rows[0].user_id);
           friend_id = result.rows[0].user_id;
-          // console.log(currUser.username, ": ", currUser.user_id);
-          // console.log(username, ": ", friend_id);
-
           
           if (currUser.user_id == friend_id) {
             res.status(400).json({error: "Cannot send request to yourself."});
@@ -496,7 +493,7 @@ app.get("/friends/list", authorize, async (req, res) => {
 
 app.patch("/friends/accept", authorize, (req, res) => {
   console.log("receving request");
-  let body = req.body; // {friend_username: "some_username"}
+  let body = req.body; 
   let friend_id;
 
   pool.query(`SELECT user_id FROM users WHERE username = $1`, [body.friend_username])
@@ -537,6 +534,40 @@ app.patch("/friends/accept", authorize, (req, res) => {
     }
   })
 });
+
+app.get("/session", authorize, (req, res) => {
+  let groupSessionList = [];
+  pool.query(`SELECT s.group_id, s.title, s.time, s.meeting_url 
+    FROM group_memberships g JOIN group_sessions s ON s.group_id = g.group_id 
+    WHERE g.user_id = $1`, [currUser.user_id]).then(result => {
+    // console.log(result.rows);
+
+    for (let i = 0; i < result.rowCount; i++) {
+      let curr = result.rows[i];
+      groupSessionList.push({session: curr, mem_list: getSessionMembers(curr.group_id)});  // {session: {group_id, title, time, meeting_url}, mem_list: [{username, user_id}, ...]}
+    }
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+
+  res.status(200).json({rows: groupSessionList});
+});
+
+
+function getSessionMembers(group_id) {
+  pool.query(`SELECT u.username, u.user_id 
+    FROM group_memberships g JOIN users u ON g.user_id = u.user_id 
+    WHERE g.group_id = $1`, [group_id]).then(result => {
+    // console.log(result.rows);
+    return result.rows;
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+}
 
 // function makeToken() {
 //   // maybe increase the bytes for this, also increase the length to store password in db

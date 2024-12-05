@@ -211,7 +211,6 @@ function strike(id, checkbox) {
     let due = row.querySelector('.due').textContent;
     if (checkbox.checked) {
         row.style.textDecoration = "line-through";
-        // TO-DO: Send patch request
         fetch("task/update", {
             headers: {
                 Accept: "application/json",
