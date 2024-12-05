@@ -374,7 +374,6 @@ app.post("/task/add", authorize, (req, res) => {
   let today = new Date();
   let dueDate = new Date(due);
 
-  // check if creator is an existent user
   pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [creatorId])
       .then(result => {
         // console.log(result.rows);
@@ -535,6 +534,19 @@ app.patch("/friends/accept", authorize, (req, res) => {
   })
 });
 
+function getSessionMembers(group_id) {
+  pool.query(`SELECT u.username, u.user_id 
+    FROM group_memberships g JOIN users u ON g.user_id = u.user_id 
+    WHERE g.group_id = $1`, [group_id]).then(result => {
+    // console.log(result.rows);
+    return result.rows;
+  })
+  .catch(error => {
+    console.error("error:", error);
+    res.status(500).json({error: "Something went wrong."});
+  });
+}
+
 app.get("/session", authorize, (req, res) => {
   let groupSessionList = [];
   pool.query(`SELECT s.group_id, s.title, s.time, s.meeting_url 
@@ -555,19 +567,53 @@ app.get("/session", authorize, (req, res) => {
   res.status(200).json({rows: groupSessionList});
 });
 
+app.post("/session/create", authorize, (req, res) => {
+  let body = req.body; // {title, time, meeting_url}
 
-function getSessionMembers(group_id) {
-  pool.query(`SELECT u.username, u.user_id 
-    FROM group_memberships g JOIN users u ON g.user_id = u.user_id 
-    WHERE g.group_id = $1`, [group_id]).then(result => {
-    // console.log(result.rows);
-    return result.rows;
+  if (
+    !body.hasOwnProperty("title") ||
+    !body.hasOwnProperty("time")
+  ) {
+    return res.status(404).json({error: "Missing session title or time"});
+  }
+
+  let title = body.title;
+  let time =  body.time;
+  let meeting_url = body.meeting_url;
+
+  if (!meeting_url) {
+    meeting_url = "";
+  }
+
+  pool.query(
+    `INSERT INTO group_sessions(title, time, meeting_url)
+    VALUES($1, $2, $3)
+    on conflict do nothing
+    RETURNING *`,
+    [title, time, meeting_url],
+  )
+  .then((result) => {
+    let group_id = result.rows[0].group_id;
+
+    pool.query(
+      `INSERT INTO group_memberships(group_id, user_id)
+      VALUES($1, $2)
+      on conflict do nothing
+      RETURNING *`,
+      [group_id, currUser.user_id],
+    )
+    .then((result) => {})
+    .catch((error) => {
+      console.log(error);
+      return res.status(500).send();
+    })
   })
-  .catch(error => {
-    console.error("error:", error);
-    res.status(500).json({error: "Something went wrong."});
-  });
-}
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+
+})
 
 // function makeToken() {
 //   // maybe increase the bytes for this, also increase the length to store password in db
