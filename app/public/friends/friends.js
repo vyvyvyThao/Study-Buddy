@@ -242,9 +242,9 @@ function createMessageElement(message, sender) {
     return element
 }
 
-socket.on('sent message', function ({message, sender}) {
+socket.on('sent message', function ({message, sender_username}) {
     const chatBox = document.getElementById("chat-box");
-    let element = createMessageElement(message, sender);
+    let element = createMessageElement(message, sender_username);
     chatBox.appendChild(element);
     chatBox.scrollTo(0, chatBox.scrollHeight);
 });
