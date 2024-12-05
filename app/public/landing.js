@@ -30,6 +30,29 @@ signup_button.addEventListener("click", () => {
       password: passwordValue,
       timestamp: finalTimestampValue
     })
+  }).then((response) => {
+    if (response.status === 200) {
+      return response.json();
+    }
+  }).then((body) => {
+    fetch("/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: usernameValue,
+        password: passwordValue,
+        last_login: finalTimestampValue
+      })
+    }).then((response) => {
+      return response.json();
+    }).then(body => {
+      console.log("BODY: ", body);
+      window.location = body.url;
+    }).catch((error) => {
+      console.log(error);
+    })
   });
 });
 

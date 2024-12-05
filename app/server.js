@@ -54,19 +54,14 @@ let cookieOptions = {
 };
 
 function makeToken() {
-  // maybe increase the bytes for this, also increase the length to store password in db
+  // maybe increase the bytes for this, also increase the length to store password in db - done
   return crypto.randomBytes(18).toString("hex");
 }
 
-function validateLoginCredentials(body) {
-  // TODO: move validation here
-  return true;
-}
 
 app.post("/register", async (req, res) => {
   let body = req.body;
   //console.log(body);
-  // TODO: Put the below validation in the function above
   if (
     !body.hasOwnProperty("username") ||
     !body.hasOwnProperty("email") ||
@@ -81,7 +76,6 @@ app.post("/register", async (req, res) => {
       body["password"].length < 7 || body["password"].length > 20 ||
       body["email"].length < 11 || body["email"].length > 255
     ) {
-      // TODO: add more detail to the error message
       return res.status(400).json({error: 'Username, password must be below 20 characters'});
     }
   }
@@ -103,7 +97,7 @@ app.post("/register", async (req, res) => {
     console.log("HASH: ", hash);
   } catch (error) {
     console.log("hash failed", error);
-    return res.sendStatus(500);
+    return res.status(500);
   }    
   // console.log("HASH: ", hash);
 
@@ -118,10 +112,10 @@ app.post("/register", async (req, res) => {
   })
   .catch((error) => {
     console.log(error);
-    return res.status(500).send();
+    return res.status(500);
   });
   // TODO: change the result body (look into automatic logging in after sign up)
-  return res.status(200).redirect("/login");
+  return res.status(200).json();
 });
 
 app.post("/login", async (req, res) => {
@@ -615,190 +609,6 @@ app.post("/session/create", authorize, (req, res) => {
 
 })
 
-// function makeToken() {
-//   // maybe increase the bytes for this, also increase the length to store password in db
-//   return crypto.randomBytes(18).toString("hex");
-// }
-
-// function validateLoginCredentials(body) {
-//   // TODO: move validation here
-//   return true;
-// }
-
-// app.post("/register", async (req, res) => {
-//   let body = req.body;
-//   //console.log(body);
-//   // TODO: Put the below validation in the function above
-//   if (
-//     !body.hasOwnProperty("username") ||
-//     !body.hasOwnProperty("email") ||
-//     !body.hasOwnProperty("password") ||
-//     !body.hasOwnProperty("timestamp")
-//   ) {
-//     return res.status(400).json({error: 'Bad Request'});
-//   }
-//   else {
-//     if (
-//       body["username"].length < 1 || body["username"].length > 20 ||
-//       body["password"].length < 7 || body["password"].length > 20 ||
-//       body["email"].length < 11 || body["email"].length > 255
-//     ) {
-//       // TODO: add more detail to the error message
-//       return res.status(400).json({error: 'Username, password must be below 20 characters'});
-//     }
-//   }
-
-//   let {username, email, password, timestamp} = body;
-//   console.log("IN SERVER: ", username, email, password, timestamp);
-  
-//   pool.query(`SELECT username FROM users WHERE username = $1`, [username])
-//     .then(result => {
-//       // console.log(result.rows);
-//       if (result.rows.length !== 0) {
-//         return res.status(400).json({error: 'username already exists'});
-//       }
-//     });
-
-//   let hash;
-//   try {
-//     hash = await argon2.hash(password);
-//     console.log("HASH: ", hash);
-//   } catch (error) {
-//     console.log("hash failed", error);
-//     return res.sendStatus(500);
-//   }    
-//   console.log("HASH: ", hash);
-
-//   await pool.query(
-//     `INSERT INTO users(username, password, email, created_at)
-//     VALUES($1, $2, $3, $4)
-//     RETURNING *`,
-//     [username, hash, email, timestamp],
-//   )
-//   .then((result) => {
-//     console.log("Success");
-//   })
-//   .catch((error) => {
-//     console.log(error);
-//     return res.status(500).send();
-//   });
-//   // TODO: change the result body (look into automatic logging in after sign up)
-//   return res.sendStatus(200);
-// });
-
-// app.post("/login", async (req, res) => {
-//   let body = req.body;
-//   if (
-//     !body.hasOwnProperty("username") ||
-//     !body.hasOwnProperty("password") ||
-//     !body.hasOwnProperty("last_login")
-//   ) {
-//     return res.status(400).json({error: 'Bad Request'});
-//   }
-//   else {
-//     if (
-//       body["username"].length < 1 || body["username"].length > 20 ||
-//       body["password"].length < 7 || body["password"].length > 20
-//     ) {
-//       // TODO: add more detail to the error message
-//       return res.status(400).json({error: 'Username, password must be below 20 characters'});
-//     }
-//   }
-//   let {username, password, last_login} = body;
-//   console.log("IN SERVEr, login: ", username, password, last_login);
-
-//   let result;
-//   try {
-//     result = await pool.query(
-//       `SELECT * FROM users WHERE username = $1`, [username],
-//     );
-//   } catch (error) {
-//     console.log("error");
-//     return res.status(500).json({error: error});
-//   }
-
-//   if (result.rows.length === 0) {
-//     return res.status(400).json({error: "No user found"});
-//   }
-//   let hash = result.rows[0].password;
-//   let user_id = result.rows[0].user_id;
-//   console.log(username, password, hash);
-
-//   let verifyPassword;
-//   try {
-//     verifyPassword = await argon2.verify(hash, password);
-//   } catch (error) {
-//     console.log("FAILED PASSWORD VERIFICATION", error);
-//     return res.sendStatus(500);
-//   }
-
-//   if (!verifyPassword) {
-//     console.log("Password doesn't match");
-//     return res.sendStatus(400);
-//   }
-
-//   let token = makeToken();
-//   console.log("Generated token", token);
-//   pool.query(
-//     `INSERT INTO login_tokens(token, user_id)
-//     VALUES($1, $2)
-//     RETURNING *`,
-//     [token, user_id],
-//   ).catch((error) => {
-//     console.log(error);
-//     return res.status(500).send();
-//   });
-//   // Updating current user with the logged in user
-//   currUser = {};
-//   currUser["user_id"] = user_id;
-//   currUser["username"] = username;
-
-//   // TODO: check this again
-//   res.cookie("token", token, cookieOptions);
-//   console.log("redirect");
-//   //res.sendFile("/public/my-page.html", {root: __dirname});
-//   //res.status(200).redirect("/my-page/" + user_id);
-//   return res.json({"url": "/my-page.html", "token": token});
-// });
-
-// // app.get("/my-page/:user_id", (req, res) => {
-// //   console.log("REDIRECTED!");
-// //   let file = path.join(__dirname, '/public', 'my-page.html');
-// //   console.log(file);
-// //   res.sendFile(file);
-// //   //return res.sendFile("/public/my-page.html", {root: __dirname});
-// // })
-
-// // TODO: automatic user login after signup
-// // TODO: logout frontend + client side 
-// // DONE: logout
-// // DONE: put authorize middleware in other requests
-
-// app.post("/logout", (req, res) => {
-//   let { token } = req.cookies;
-
-//   if (token === undefined) {
-//     console.log("User already logged out");
-//     return res.status(400).json({error: "Already logged out"});
-//   }
-  
-//   let tokens = pool.query(
-//     `SELECT user_id FROM login_tokens WHERE token = $1`, [token],
-//   );
-
-//   if(tokens.length === 0) {
-//     console.log("Token doesn't exist");
-//     return res.status(400).json({error: "Token doesn't exist"});
-//   }
-
-//   pool.query(
-//     `DELETE FROM login_tokens WHERE token = $1`, [token],
-//   );
-//   console.log("deleted token");
-
-//   return res.clearCookie("token", cookieOptions).send();
-
-// })
 
 function invalidChatId(chatId) {
   chatIdValue = parseInt(chatId)
