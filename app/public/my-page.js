@@ -342,4 +342,19 @@ function createWidget(type) {
 }
 
 
+let studySetsBtn = document.getElementById("studysets");
+let friendsBtn = document.getElementById("friends");
+let logoutBtn = document.getElementById("logout");
 
+studySetsBtn.addEventListener("click", () => {
+  
+});
+
+
+logoutBtn.addEventListener("click", () => {
+  fetch("/logout").then((response) => {
+    return response.json();
+  }).then((body) => {
+    window.location = body.url;
+  })
+});

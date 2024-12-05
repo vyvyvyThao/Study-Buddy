@@ -298,7 +298,7 @@ app.post("/logout", (req, res) => {
   );
   console.log("deleted token");
 
-  return res.clearCookie("token", cookieOptions).send();
+  return res.clearCookie("token", cookieOptions).json({"url": "/index.html"});
 
 })
 
@@ -777,6 +777,7 @@ io.on("connection", async (socket) => {
   
   try {
     socket.data.userId = await getUserId(cookies.token);
+    socket.data.userDetails = await getUserDetails(socket.data.userId);
   } catch {
     // socket.disconnect();
   }
@@ -804,7 +805,8 @@ io.on("connection", async (socket) => {
       "INSERT INTO chat_messages(chat_id, sender_id ,chat_message, sent_date) VALUES($1, $2, $3, $4) RETURNING *",
       [chatId, socket.data.userId ,message, new Date(new Date().toISOString())]
     ).then((result) => {
-      socket.to(socket.data.currentChatId).emit("sent message", {"message": message});
+      socket.to(socket.data.currentChatId).emit("sent message", {"message": message, "sender_username": socket.data.userDetails.username});
+      console.log(message)
     }).catch(error => {
       console.log(error);
     });
