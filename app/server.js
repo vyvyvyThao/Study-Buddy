@@ -762,6 +762,83 @@ app.get("/chat-messages", (req, res) => {
   })
 }) 
 
+app.post("/study-sets/add", authorize,(req, res) => {
+  let title = req.body.title;
+  
+  pool.query(
+    `INSERT INTO study_sets(title, creator_id) 
+    VALUES($1, $2)
+    RETURNING *`,
+    [title, res.locals.userId],
+  )
+  .then((result) => {
+    let studyset = result.rows[0]
+
+    pool.query(
+      `INSERT INTO flashcards(card_index, front, back, studyset_id) 
+      VALUES($1, $2, $3, $4)
+      RETURNING *`,
+      [1, "Default Front", "Default Back", studyset.id],
+    )
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+})
+
+app.delete("/study-sets/", authorize, (req, res) => {
+  let title = req.body.title;
+  
+  pool.query(
+    `DELETE FROM study_sets WHERE title=$1 AND creator_id=$2
+    RETURNING *`,
+    [title, res.locals.userId]
+  )
+  .then((result) => {
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+})
+
+app.get("study-sets/show", authorize, (req, res) => {
+  let studysetTitle = req.body.title;
+  let studysetId;
+
+  pool.query(
+    `SELECT id FROM study_sets WHERE title=$1 AND creator_id=$2`,
+    [title, res.locals.userId]
+  )
+  .then((result) => {
+    studysetId = result.rows[0].id;
+
+    pool.query(
+      `SELECT card_index, front, back FROM flashcards WHERE studyset_id=$1`,
+      [studysetId]
+    )
+    //--------------------------------
+
+  })
+
+
+  pool.query(
+    `SELECT card_index, front, back FROM flashcards WHERE studyset_id=$1`,
+    [studysetId]
+  )
+  .then((result) => {
+    let flashcards = result.rows;
+
+    res.status(200).json(flashcards);
+  })
+  .catch((error) => {
+    console.log(error);
+    return res.status(500).send();
+  })
+
+})
+
 io.on("connection", async (socket) => {
   console.log(`Socket ${socket.id} connected`);
 
