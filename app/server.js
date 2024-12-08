@@ -1,5 +1,44 @@
-const pg = require("pg");
-const express = require("express");
+let express = require("express");
+let { Pool } = require("pg");
+
+// make this script's dir the cwd
+// b/c npm run start doesn't cd into src/ to run this
+// and if we aren't in its cwd, all relative paths will break
+process.chdir(__dirname);
+
+let port = 3000;
+let host;
+let databaseConfig;
+// fly.io sets NODE_ENV to production automatically, otherwise it's unset when running locally
+if (process.env.NODE_ENV == "production") {
+	host = "0.0.0.0";
+	databaseConfig = { connectionString: process.env.DATABASE_URL };
+} else {
+	host = "localhost";
+	let { PGUSER, PGPASSWORD, PGDATABASE, PGHOST, PGPORT } = process.env;
+	databaseConfig = { PGUSER, PGPASSWORD, PGDATABASE, PGHOST, PGPORT };
+}
+
+let app = express();
+app.use(express.json());
+app.use(express.static("public"));
+
+// uncomment these to debug
+// console.log(JSON.stringify(process.env, null, 2));
+// console.log(JSON.stringify(databaseConfig, null, 2));
+
+let pool = new Pool(databaseConfig);
+pool.connect().then(() => {
+	console.log("Connected to db");
+});
+
+/*
+KEEP EVERYTHING ABOVE HERE
+REPLACE THE FOLLOWING WITH YOUR SERVER CODE 
+*/
+
+// const pg = require("pg");
+// const express = require("express");
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -9,33 +48,31 @@ let cookieParser = require("cookie-parser");
 let crypto = require("crypto");
 let cookie = require("cookie");
 
-const app = express();
 let server = http.createServer(app);
 let io = new Server(server);
 
 let currUser;     // for logged in user's data
 
 process.chdir(__dirname);
-const path = require("path");
+// const path = require("path");
 
-const port = 3000;
-const hostname = "localhost";
+// const hostname = "localhost";
 
-const env = require("../env.json");
-const { create } = require("domain");
-const { error } = require("console");
-const { console } = require("inspector");
-const Pool = pg.Pool;
-const pool = new Pool(env);
-
+// const env = require("../env.json");
+// const { create } = require("domain");
+// const { error } = require("console");
+// const { console } = require("inspector");
+// const Pool = pg.Pool;
+// const pool = new Pool(env);
 
 
-pool.connect().then(function () {
-  console.log(`Connected to database ${env.database}`);
-});
 
-app.use(express.static("public"));
-app.use(express.json());
+// pool.connect().then(function () {
+//   console.log(`Connected to database ${env.database}`);
+// });
+
+// app.use(express.static("public"));
+// app.use(express.json());
 app.use(cookieParser());
 
 
@@ -952,6 +989,11 @@ io.on("connection", async (socket) => {
   });
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Listening at: http://${hostname}:${port}`);
+
+/*
+KEEP EVERYTHING BELOW HERE
+*/
+
+app.listen(port, host, () => {
+	console.log(`http://${host}:${port}`);
 });
