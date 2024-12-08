@@ -3,6 +3,7 @@ body, html {
     padding: 0;
     font-family: Arial, sans-serif;
     box-sizing: border-box;
+    background-color: #A8BC72;
 }
 
 .navbar {
@@ -37,7 +38,6 @@ body, html {
 
 .sidebar {
     width: 250px;
-    background-color: #f4f4f4;
     padding: 1rem;
     overflow-y: auto;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -45,6 +45,7 @@ body, html {
     transition: transform 0.3s ease-in-out;
     position: fixed;
     height: 100%;
+    background-color: #18203C;
 }
 
 .sidebar.active {
