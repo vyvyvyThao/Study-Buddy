@@ -472,15 +472,16 @@ app.post("/friends/request", authorize, (req, res) => {
 app.get("/friends/list", authorize, async (req, res) => {
   let userId =  res.locals.userId;
   pool.query(
-    `SELECT friend_id, friend_accepted, user_accepted, username, chat_id FROM
+    `SELECT friend_id, friend_accepted, user_accepted, username FROM
     (SELECT user2_id as friend_id, user2_accepted as friend_accepted, user1_accepted as user_accepted FROM friendships WHERE user1_id = $1 
     UNION SELECT user1_id as friend_id, user1_accepted as friend_accepted, user2_accepted as user_accepted FROM friendships WHERE user2_id = $1) AS t1
-    LEFT JOIN users ON t1.friend_id=users.user_id LEFT JOIN user_chat ON t1.friend_id = user_chat.user_id`
+    LEFT JOIN users ON t1.friend_id=users.user_id`
     , [userId]
   ).then((results) => {
     return res.status(200).json(results.rows)
   }).catch(error => {
     console.log(error);
+    return res.sendStatus(500);
   });
 });
 
@@ -669,6 +670,19 @@ app.get("/friends/:chatId", authorize, (req, res) => {
   }
 
   return res.sendFile("public/friends/friends.html", { root: __dirname });
+})
+
+app.get("/chat", authorize, async (req, res) => {
+  let userId = res.locals.userId;
+  try {
+    results = await pool.query(
+      `SELECT t1.chat_id as chat_id, t2.user_id as friend_id FROM (SELECT * FROM user_chat as t1 WHERE user_id = $1) as t1
+       JOIN user_chat as t2 ON t1.chat_id = t2.chat_id AND t2.user_id != $1;`
+      , [userId]);
+    res.status(200).json(results.rows);
+  } catch {
+    return res.sendStatus(500);
+  }
 })
 
 app.post("/chat", authorize, (req, res) => {

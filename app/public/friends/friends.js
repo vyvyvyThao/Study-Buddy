@@ -6,10 +6,22 @@ let chatHistory = {};
 let socket = io();
 let chatBox = document.getElementById("chat-box");
 let userDetails;
-
+let chats;
 
 function getChatId() {
     return window.location.pathname.split("/").pop();
+}
+
+async function loadChats() {
+    return await fetch(`/chat`).then((response) => {
+        return response.json();
+    }).then((body) => {
+        let chats = {}
+        for( let chatObject of body) {
+            chats[chatObject.friend_id] = chatObject; 
+        }
+        return chats;
+    }).catch();
 }
 
 function getChatMessages(chatIdString) {
@@ -37,10 +49,11 @@ input.addEventListener("keypress", (event) => {
     }
 });
 
-window.onload = function () {
+window.onload = async function () {
     populateFriendList();
     populateFriendRequests();
     getUserData();
+    chats = await loadChats();
 };
 
 async function getUserData() {
@@ -190,10 +203,9 @@ function selectFriend(friend) {
     //     p.textContent = message;
     //     chatBox.appendChild(p);
     // });
-    if (friend.chat_id) {
-        history.pushState(".","", `/friends/${friend.chat_id}`)
-        socket.emit("join", {"chatId": friend.chat_id})
-        // window.location.href = `/friends/${friend.chat_id}`
+    if (chats[friend.friend_id] && chats[friend.friend_id].chat_id) {
+        history.pushState(".","", `/friends/${chats[friend.friend_id].chat_id}`)
+        socket.emit("join", {"chatId": chats[friend.friend_id].chat_id})
         let chatIdString = getChatId();
         getChatMessages(chatIdString);
     } else {
