@@ -89,7 +89,7 @@ async function populateFriendList() {
         li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
-        if (chatId && chatId === friend.chat_id.toString()){
+        if (chatId && chatId === chats[friend.friend_id].chat_id){
             selectFriend(friend);
         }
     });
@@ -215,7 +215,7 @@ function selectFriend(friend) {
         }).then((response) => {
             return response.json();
         }).then((body) => {
-            friend.chat_id = body.chatId;
+            chats[friend.friend_id].chat_id = body.chatId;
             history.pushState(".", "", `/friends/${body.chatId}`)
             socket.emit("join", {"chatId": body.chatId})
             // window.location.href = `/friends/${body.chatId}`
