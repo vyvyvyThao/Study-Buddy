@@ -85,6 +85,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             list.removeChild(li);
                         }
                     });
+
+                    flashcardContainer.innerHTML=`
+                        <h2 id="study-set-title">Select a Study Set</h2>
+                        <div id="flashcard" class="flashcard">
+                        <p id="flashcard-text">Click a study set to start.</p>
+                        `
                     alert("Study set deleted successfully.");
                 } else {
                     alert("Failed to delete study set.");
