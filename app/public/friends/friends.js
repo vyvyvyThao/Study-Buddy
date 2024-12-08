@@ -3,7 +3,7 @@ let chatHistory = {};
 let socket = io();
 let chatBox = document.getElementById("chat-box");
 let userDetails;
-let chats;
+let chats = loadChats;
 
 function getChatId() {
     return window.location.pathname.split("/").pop();
@@ -50,7 +50,6 @@ window.onload = async function () {
     populateFriendList();
     populateFriendRequests();
     getUserData();
-    chats = await loadChats();
 };
 
 async function getUserData() {
@@ -84,12 +83,13 @@ async function populateFriendList() {
     } catch {}
     let chatId = getChatId();
 
+    chats = await chats;
     friends.forEach(friend => {
         const li = document.createElement("li");
         li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
-        if (chatId && chatId === friend.chat_id.toString()){
+        if (chatId && chats[friend.friend_id] && chatId === chats[friend.friend_id].chat_id){
             selectFriend(friend);
         }
     });
@@ -215,7 +215,7 @@ function selectFriend(friend) {
         }).then((response) => {
             return response.json();
         }).then((body) => {
-            friend.chat_id = body.chatId;
+            chats[friend.friend_id].chat_id = body.chatId;
             history.pushState(".", "", `/friends/${body.chatId}`)
             socket.emit("join", {"chatId": body.chatId})
             // window.location.href = `/friends/${body.chatId}`
