@@ -11,7 +11,7 @@
         <h1>Study Buddy</h1>
 
         <div id="sidenav">
-          <button id="toggleSidebarBtn">Widgets</button>
+          <button id="toggle-sidebar">Widgets</button>
           <button id="studysets">Study Sets</button>
           <button id="friends">Friends</button>
           <button id="logout">Logout</button>
@@ -19,8 +19,7 @@
     </header>
 
     <div>
-
-      <div class="sidebar" id="sidebar">
+      <aside class="sidebar" id="sidebar">
           <button onclick="createWidget('timer')">Add Timer</button>
           <button onclick="createWidget('note')">Add Note</button>
           <button onclick="createWidget('task-list')">Add Task List</button>
@@ -28,7 +27,7 @@
           <button id="uploadMusicBtn">Upload Music</button>
           <input type="file" id="imageUploader" accept="image/*" hidden>
           <input type="file" id="musicUploader" accept="audio/*" hidden>
-      </div>
+      </aside>
 
       <main>
           <div id="workspace"></div>

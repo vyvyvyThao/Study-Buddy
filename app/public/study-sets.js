@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentStudySetTitle;
 
     const sidebar = document.getElementById("sidebar");
-    const toggleSidebarButton = document.getElementById("toggle-sidebar");
     const studySetList = document.getElementById('study-set-list');
     const flashcardContainer = document.getElementById("flashcard-container");
 
@@ -35,10 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
             studySetList.appendChild(listItem);
         });
     }
-
-    toggleSidebarButton.addEventListener("click", () => {
-        sidebar.classList.toggle("active");
-    });
 
     document.getElementById("add-study-set").addEventListener("click", async () => {
         const title = prompt("Enter the name of the study set:");
