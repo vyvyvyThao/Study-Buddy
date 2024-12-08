@@ -4,7 +4,11 @@ document.getElementById("uploadImageBtn").addEventListener("click", () => {
 });
 
 document.getElementById("uploadMusicBtn").addEventListener("click", () => {
-    document.getElementById("musicUploader").click();
+    const audio = document.getElementById("backgroundMusic");
+    // audio.src = url;
+    audio.hidden = false;
+    audio.play();
+    // document.getElementById("musicUploader").click();
 });
 
 document.getElementById("imageUploader").addEventListener("change", function (event) {
@@ -18,16 +22,16 @@ document.getElementById("imageUploader").addEventListener("change", function (ev
     }
 });
 
-document.getElementById("musicUploader").addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-        const url = URL.createObjectURL(file);
-        const audio = document.getElementById("backgroundMusic");
-        audio.src = url;
-        audio.hidden = false;
-        audio.play();
-    }
-});
+// document.getElementById("musicUploader").addEventListener("change", function (event) {
+//     const file = event.target.files[0];
+//     if (file) {
+//         const url = URL.createObjectURL(file);
+//         const audio = document.getElementById("backgroundMusic");
+//         audio.src = url;
+//         audio.hidden = false;
+//         audio.play();
+//     }
+// });
 
 document.getElementById("toggle-sidebar").addEventListener("click", () => {
     sidebar.classList.toggle("active");

@@ -6,6 +6,7 @@ body, html {
     overflow: hidden;
     font-family: Arial, sans-serif;
     background-size: cover;
+    background-image: url("img/night_cafe.gif");
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -29,8 +30,8 @@ body, html {
     background-color: rgba(65, 39, 34, 0.8);
     padding: 15px;
     color: white;
-    position: absolute; /* Position relative to the body */
-    z-index: 600; /* Sidebar should be above the background */
+    position: absolute;
+    z-index: 600; 
 }
 
 .sidebar.active {
@@ -55,9 +56,9 @@ body, html {
 #workspace {
     position: relative;
     width: 100%;
-    height: calc(100vh - 50px); /* Adjust for navbar height */
+    height: calc(100vh - 50px);
     overflow: hidden;
-    z-index: 500; /* Workspace should be above the background */
+    z-index: 500; 
 }
 
 .widget {
@@ -67,7 +68,7 @@ body, html {
     color: #F1F7ED;
     border-radius: 5px;
     cursor: move;
-    z-index: 600; /* Widgets should be above workspace and background */
+    z-index: 600;
 }
 
 .timer, .note {
