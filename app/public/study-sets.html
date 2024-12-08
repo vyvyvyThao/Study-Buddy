@@ -7,15 +7,18 @@
     <link rel="stylesheet" href="study-sets.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <h1>Study Sets</h1>
-            <button id="toggle-sidebar">Menu</button>
-        </nav>
+    <header class="navbar">
+        <h1>Study Buddy</h1>
+
+        <div id="sidenav">
+          <button id="studysets">Study Sets</button>
+          <button id="friends">Friends</button>
+          <button id="logout">Logout</button>
+        </div>
     </header>
 
     <div class="container">
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar active" id="sidebar">
             <button id="add-study-set">Add Study Set</button>
             <button id="delete-study-set">Delete Study Set</button>
             <ul id="study-set-list">
@@ -28,18 +31,6 @@
                 <div id="flashcard" class="flashcard">
                     <p id="flashcard-text">Click a study set to start.</p>
                 </div>
-<!--                 
-                <div class="controls">
-                    <button id="prev-card">Previous</button>
-                    <button id="flip-card">Flip</button>
-                    <button id="next-card">Next</button>
-                </div>
-
-                <div class="edit-controls">
-                    <button id="add-flashcard">Add Flashcard</button>
-                    <button id="edit-flashcard">Edit Flashcard</button>
-                    <button id="delete-flashcard">Delete Flashcard</button>
-                </div> -->
             </div>
         </main>
     </div>

@@ -776,6 +776,131 @@ app.get("/chat-messages", (req, res) => {
   })
 }) 
 
+app.get("/study-sets", authorize, async (req, res) => {
+  try {
+      const result = await pool.query(
+        `SELECT title FROM study_sets WHERE creator_id = $1`,
+        [res.locals.userId]
+      );
+
+      res.status(200).json(result.rows);
+  } catch (error) {
+      console.error('Error fetching study sets:', error);
+      res.status(500).json({ error: 'Failed to fetch study sets.' });
+  }
+})
+
+app.post("/study-sets/add", authorize, async (req, res) => {
+  const { title } = req.body;
+  try {
+      const result = await pool.query(
+          `INSERT INTO study_sets (title, creator_id) VALUES ($1, $2) RETURNING *`,
+          [title, res.locals.userId]
+      );
+      const studyset = result.rows[0];
+      await pool.query(
+          `INSERT INTO flashcards (front, back, studyset_id) VALUES ($1, $2, $3)`,
+          ["Default Front", "Default Back", studyset.id]
+      );
+      res.status(201).send({ message: "Study set added successfully" });
+  } catch (error) {
+      console.error("Error adding study set:", error);
+      res.status(500).send("Internal server error");
+  }
+})
+
+app.delete("/study-sets", authorize, async (req, res) => {
+  const { title } = req.body;
+  try {
+      const result = await pool.query(
+          `DELETE FROM study_sets WHERE title = $1 AND creator_id = $2 RETURNING *`,
+          [title, res.locals.userId]
+      );
+      if (result.rowCount === 0) {
+          return res.status(404).send({ error: "Study set not found" });
+      }
+      res.status(200).send({ message: "Study set deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting study set:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+app.get("/study-sets/show", authorize, async (req, res) => {
+  const { title } = req.query;
+  try {
+      const studysetIdResult = await pool.query(
+          `SELECT id FROM study_sets WHERE title = $1 AND creator_id = $2`,
+          [title, res.locals.userId]
+      );
+      if (studysetIdResult.rowCount === 0) {
+          return res.status(404).send({ error: "Study set not found" });
+      }
+      const studysetId = studysetIdResult.rows[0].id;
+      const flashcardsResult = await pool.query(
+          `SELECT studyset_id, id, front, back FROM flashcards WHERE studyset_id = $1`,
+          [studysetId]
+      );
+      res.status(200).json(flashcardsResult.rows);
+  } catch (error) {
+      console.error("Error fetching study set or flashcards:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+app.post("/flashcards/add", authorize, async (req, res) => {
+  const { studysetId, front, back } = req.body;
+  try {
+      const result = await pool.query(
+          `INSERT INTO flashcards (studyset_id, front, back) 
+          VALUES ($1, $2, $3) 
+          RETURNING *`,
+          [studysetId, front, back]
+      );
+      res.status(200).json(result.rows[0]);
+  } catch (error) {
+      console.error("Error adding flashcard:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+app.put("/flashcards/edit", authorize, async (req, res) => {
+  const { flashcardId, front, back } = req.body;
+  try {
+      const result = await pool.query(
+          `UPDATE flashcards SET front = $1, back = $2 WHERE id = $3 RETURNING *`,
+          [front, back, flashcardId]
+      );
+      if (result.rowCount === 0) {
+          return res.status(404).send("Flashcard not found");
+      }
+      res.status(200).json(result.rows[0]);
+  } catch (error) {
+      console.error("Error editing flashcard:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+app.delete("/flashcards/delete", authorize, async (req, res) => {
+  const { flashcardId } = req.body;
+  try {
+      const result = await pool.query(
+          `DELETE FROM flashcards WHERE id = $1 RETURNING *`,
+          [flashcardId]
+      );
+      if (result.rowCount === 0) {
+          return res.status(404).send("Flashcard not found");
+      }
+      res.status(200).json({ message: "Flashcard deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting flashcard:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+
+
+
 io.on("connection", async (socket) => {
   console.log(`Socket ${socket.id} connected`);
 

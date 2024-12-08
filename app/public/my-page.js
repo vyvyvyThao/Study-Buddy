@@ -12,7 +12,7 @@ document.getElementById("imageUploader").addEventListener("change", function (ev
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            document.getElementById("workspace").style.backgroundImage = `url(${e.target.result})`;
+            document.body.style.backgroundImage = `url(${e.target.result})`;
         };
         reader.readAsDataURL(file);
     }
@@ -29,8 +29,8 @@ document.getElementById("musicUploader").addEventListener("change", function (ev
     }
 });
 
-document.getElementById("toggleSidebarBtn").addEventListener("click", () => {
-    document.getElementById("sidebar").classList.toggle("show-sidebar");
+document.getElementById("toggle-sidebar").addEventListener("click", () => {
+    sidebar.classList.toggle("active");
 });
 
 let onClickOutside = (element, callback) => {
