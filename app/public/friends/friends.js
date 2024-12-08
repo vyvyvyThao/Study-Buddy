@@ -1,6 +1,3 @@
-// Dummy data for friends and friend requests
-let friends = [{"username":"Alice"}, {"username":"Bob"}, {"username":"Charlie"}];
-let friendRequests = ["David", "Eve"];
 let chatHistory = {};
 
 let socket = io();

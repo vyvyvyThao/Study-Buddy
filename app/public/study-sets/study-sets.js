@@ -3,13 +3,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentStudySetID;
     let currentStudySetTitle;
 
-    const sidebar = document.getElementById("sidebar");
+    // const sidebar = document.getElementById("sidebar");
     const studySetList = document.getElementById('study-set-list');
     const flashcardContainer = document.getElementById("flashcard-container");
 
     async function fetchStudySets() {
         try {
-            const response = await fetch('/study-sets');
+            const response = await fetch('/study-sets/load');
             if (!response.ok) throw new Error('Failed to fetch study sets.');
 
             const studySets = await response.json();

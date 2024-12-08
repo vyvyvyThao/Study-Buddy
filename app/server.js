@@ -776,7 +776,7 @@ app.get("/chat-messages", (req, res) => {
   })
 }) 
 
-app.get("/study-sets", authorize, async (req, res) => {
+app.get("/study-sets/load", authorize, async (req, res) => {
   try {
       const result = await pool.query(
         `SELECT title FROM study_sets WHERE creator_id = $1`,

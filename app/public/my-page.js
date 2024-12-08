@@ -351,9 +351,12 @@ let friendsBtn = document.getElementById("friends");
 let logoutBtn = document.getElementById("logout");
 
 studySetsBtn.addEventListener("click", () => {
-  
+    window.location.href = "/study-sets";
 });
 
+friendsBtn.addEventListener("click", () => {
+    window.location.href = "/friends";
+});
 
 logoutBtn.addEventListener("click", () => {
   fetch("/logout").then((response) => {
