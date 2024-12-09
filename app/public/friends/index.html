@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Friends</title>
     <link rel="stylesheet" href="friends.css">
+    <link rel="stylesheet" href="../navbar.css">
 </head>
 <body>
-    <div id="navbar">
-        <span>Study Buddy</span>
-        <a href="/my-page/">My Page</a>
-        <a href="/study-sets/">Study Sets</a>
-        <a href="/friends/">Friends</a>
-        <!-- <a href="#">Sign Out</a> -->
-         <button id="logout">Logout</button>
-    </div>
+    <header class="navbar">
+        <h1>Study Buddy</h1>
+
+        <div id="sidenav">
+          <button id="mypage">My Page</button>
+          <button id="studysets">Study Sets</button>
+          <button id="friends">Friends</button>
+          <button id="logout">Logout</button>
+        </div>
+    </header>
 
     <div id="main-content">
         <div id="left-section">
@@ -55,5 +58,6 @@
 
     <script src="/socket.io.js"></script>
     <script src="friends.js"></script>
+    <script src="../navbar.js"></script>
 </body>
 </html>

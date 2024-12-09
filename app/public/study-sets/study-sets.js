@@ -35,6 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    document.querySelector(".flashcard").addEventListener("click", function () {
+        this.classList.toggle("flipped");
+    });
+    
+
     document.getElementById("add-study-set").addEventListener("click", async () => {
         const title = prompt("Enter the name of the study set:");
         if (title) {
@@ -123,12 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         flashcardContainer.innerHTML = `
             <h2 id="study-set-title">${currentStudySetTitle}</h2>
-            <div id="flashcard">
-                ${card.front}
+            <div class="flashcard">
+                    <div class="front">${card.front}</div>
+                    <div class="back">${card.back}</div>
             </div>
+                
             <div class="controls">
                 <button id="prev-card" ${index === 0 ? "disabled" : ""}>Previous</button>
-                <button id="flip-card">Flip</button>
+                <p1>${index + 1} / ${studyset.length}</p1>
                 <button id="next-card" ${index === studyset.length - 1 ? "disabled" : ""}>Next</button>
             </div>
             <div class="edit-controls">
@@ -236,26 +243,3 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchStudySets();
 });
 
-let mypageBtn = document.getElementById("mypage");
-let friendsBtn = document.getElementById("friends");
-let logoutBtn = document.getElementById("logout");
-
-mypageBtn.addEventListener("click", () => {
-    window.location.href = "/my-page";
-});
-
-friendsBtn.addEventListener("click", () => {
-    window.location.href = "/friends";
-});
-
-logoutBtn.addEventListener("click", () => {
-  fetch("/logout", {
-    method: "POST",
-    credentials: "include",
-  }).then((response) => {
-    return response.json();
-  }).then((body) => {
-    window.location.href = "/";
-    // window.location = body.url;
-  })
-});
