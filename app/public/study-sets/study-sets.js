@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("flip-card").addEventListener("click", () => {
             const flashcard = document.getElementById("flashcard");
-            flashcard.textContent = flashcard.textContent === card.front ? card.back : card.front;
+            flashcard.textContent = flashcard.textContent.trim() === card.front ? card.back : card.front;
         });
 
         document.getElementById("prev-card").addEventListener("click", () => {
