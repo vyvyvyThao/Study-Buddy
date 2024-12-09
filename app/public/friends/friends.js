@@ -3,7 +3,7 @@ let chatHistory = {};
 let socket = io();
 let chatBox = document.getElementById("chat-box");
 let userDetails;
-let chats = loadChats;
+let chats = loadChats();
 
 function getChatId() {
     return window.location.pathname.split("/").pop();
@@ -191,15 +191,10 @@ function acceptFriendRequest(username) {
     populateFriendRequests();
 }
 
-function selectFriend(friend) {
+async function selectFriend(friend) {
     const chatBox = document.getElementById("chat-box");
     chatBox.innerHTML = `<h4>Chatting with ${friend.username}</h4>`;
-    // if (!chatHistory[friend]) chatHistory[friend] = [];
-    // chatHistory[friend].forEach(message => {
-    //     const p = document.createElement("p");
-    //     p.textContent = message;
-    //     chatBox.appendChild(p);
-    // });
+    chats = await loadChats();
     if (chats[friend.friend_id] && chats[friend.friend_id].chat_id) {
         history.pushState(".","", `/friends/${chats[friend.friend_id].chat_id}`)
         socket.emit("join", {"chatId": chats[friend.friend_id].chat_id})
@@ -215,6 +210,9 @@ function selectFriend(friend) {
         }).then((response) => {
             return response.json();
         }).then((body) => {
+            if (!chats[friend.friend_id]) {
+                chats[friend.friend_id] = {};
+            }
             chats[friend.friend_id].chat_id = body.chatId;
             history.pushState(".", "", `/friends/${body.chatId}`)
             socket.emit("join", {"chatId": body.chatId})
@@ -256,4 +254,17 @@ socket.on('sent message', function ({message, sender_username}) {
     let element = createMessageElement(message, sender_username);
     chatBox.appendChild(element);
     chatBox.scrollTo(0, chatBox.scrollHeight);
+});
+
+let logoutBtn = document.getElementById("logout");
+logoutBtn.addEventListener("click", () => {
+  fetch("/logout", {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => {
+    return response.json();
+  }).then((body) => {
+    window.location.href = "/";
+    // window.location = body.url;
+  })
 });

@@ -1,7 +1,21 @@
-DROP DATABASE IF EXISTS studybuddy;
+\c thestudybuddy
 
-CREATE DATABASE studybuddy;
-\c studybuddy
+-- use this to clear any existing tables to reinsert fresh data
+-- you'll need to add a DROP TABLE for every table you add
+-- we don't drop the database because that causes errors with fly
+
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS friendships CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS notes CASCADE;
+DROP TABLE IF EXISTS study_sets CASCADE;
+DROP TABLE IF EXISTS flashcards CASCADE;
+DROP TABLE IF EXISTS group_sessions CASCADE;
+DROP TABLE IF EXISTS group_memberships CASCADE;
+DROP TABLE IF EXISTS login_tokens CASCADE;
+DROP TABLE IF EXISTS chats CASCADE;
+DROP TABLE IF EXISTS user_chat CASCADE;
+DROP TABLE IF EXISTS chat_messages CASCADE;
 
 CREATE TABLE users (
 	user_id SERIAL PRIMARY KEY,
@@ -92,6 +106,8 @@ VALUES
 (2, 'test2', '$argon2id$v=19$m=65536,t=3,p=4$tRdux4KRbuFrE8zu2lg+Sg$tqXhH7197yHdNEemzSj2wDZC5V4EiAegAI7aItkeS5w', 'test2@gmail.com', '2024-11-12 18:57:25'),
 (3, 'test3', '$argon2id$v=19$m=65536,t=3,p=4$bOymKcC6kN8tyC88Eaq1Eg$e4/UlQAEPEsvxS0tNyrTx8bMBFY5UQkNbS5foO7lCVc', 'test3@gmail.com', '2024-11-12 18:57:25'),
 (4, 'test4', '$argon2id$v=19$m=65536,t=3,p=4$z/5wL/hh8waQoqp4p5wmHA$8R6NjOuFjz/X+E3jrnJ6Yxh0FriZfKC7v8mRZKg+QuY', 'test4@gmail.com', '2024-11-12 18:57:25');
+SELECT setval('users_id_seq',
+  (SELECT max(user_id)) FROM users);
 
 INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
 
@@ -108,4 +124,8 @@ VALUES
 INSERT INTO friendships(user1_id, user2_id, user1_accepted, user2_accepted) VALUES (1, 2, true, true), (1,4, true, true), (2,3, true, true), (2,4, true, true);
 
 INSERT INTO study_sets(id, creator_id, title) VALUES (1, 1, 'SE310'), (2, 1, 'French'), (3, 2, 'German');
+SELECT setval('study_sets_id_seq', max(id)) FROM study_sets;
+
 INSERT INTO flashcards(studyset_id, front, back) VALUES (1, 'process of breaking down a complex process into smaller, simpler parts', 'functional decomposition'), (1, 'object relies on another to provide a specified set of functionality', 'delegation'), (1, 'manner & degree of interdependence', 'coupling'), (1, 'degree to which elements of a module belong together', 'cohesion'), (2, 'Hello', 'Bonjour'), (2, 'Goodbye', 'Au revoir'), (2, 'Thank you', 'Merci'), (3, 'Good day', 'Guten tag'), (3, 'Thanks', 'Danke'), (3, 'Goodbye', 'Auf Wiedersehen');
+
+\q

@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("flip-card").addEventListener("click", () => {
             const flashcard = document.getElementById("flashcard");
-            flashcard.textContent = flashcard.textContent === card.front ? card.back : card.front;
+            flashcard.textContent = flashcard.textContent.trim() === card.front ? card.back : card.front;
         });
 
         document.getElementById("prev-card").addEventListener("click", () => {
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (front && back) {
                 try {
-                    const response = await fetch("flashcards/add", {
+                    const response = await fetch("/flashcards/add", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const back = prompt("Edit the back of the flashcard:", card.back);
             if (front && back) {
                 try {
-                    const response = await fetch("flashcards/edit", {
+                    const response = await fetch("/flashcards/edit", {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = studyset[index];
             if (confirm("Are you sure you want to delete this flashcard?")) {
                 try {
-                    const response = await fetch("flashcards/delete", {
+                    const response = await fetch("/flashcards/delete", {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json",
@@ -234,4 +234,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     fetchStudySets();
+});
+
+let mypageBtn = document.getElementById("mypage");
+let friendsBtn = document.getElementById("friends");
+let logoutBtn = document.getElementById("logout");
+
+mypageBtn.addEventListener("click", () => {
+    window.location.href = "/my-page";
+});
+
+friendsBtn.addEventListener("click", () => {
+    window.location.href = "/friends";
+});
+
+logoutBtn.addEventListener("click", () => {
+  fetch("/logout", {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => {
+    return response.json();
+  }).then((body) => {
+    window.location.href = "/";
+    // window.location = body.url;
+  })
 });

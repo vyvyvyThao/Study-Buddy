@@ -359,9 +359,13 @@ friendsBtn.addEventListener("click", () => {
 });
 
 logoutBtn.addEventListener("click", () => {
-  fetch("/logout").then((response) => {
+  fetch("/logout", {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => {
     return response.json();
   }).then((body) => {
-    window.location = body.url;
+    window.location.href = "/";
+    // window.location = body.url;
   })
 });

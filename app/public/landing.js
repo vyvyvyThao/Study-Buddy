@@ -49,7 +49,14 @@ signup_button.addEventListener("click", () => {
       return response.json();
     }).then(body => {
       console.log("BODY: ", body);
-      window.location = body.url;
+      window.location.href = body.url;
+      // let user_name = body.username;
+      // let url = `/${user_name}/my-page`
+      // fetch(url).then((response) => {
+      //   return response.json();
+      // }).catch((error) => {
+      //   console.log(error);
+      // })
     }).catch((error) => {
       console.log(error);
     })
@@ -80,8 +87,19 @@ login_button.addEventListener("click", () => {
   }).then((response) => {
     return response.json();
   }).then(body => {
-    console.log("BODY: ", body);
-    window.location = body.url;
+    console.log("BODY: ", body);   
+    let user_name = body.username;
+    let url = `/${user_name}/my-page`
+    window.location.href = body.url;//url;
+    //   fetch(url).then((response) => {
+    //     if(response.status === 200) {
+    //       return response.json();
+    //     }
+    //   }).then((body) => {
+    //     window.location.href = body.url;
+    //   }).catch((error) => {
+    //     console.log(error);
+    //   })
   }).catch((error) => {
     console.log(error);
   })

@@ -1,5 +1,44 @@
-const pg = require("pg");
-const express = require("express");
+let express = require("express");
+let { Pool } = require("pg");
+
+// make this script's dir the cwd
+// b/c npm run start doesn't cd into src/ to run this
+// and if we aren't in its cwd, all relative paths will break
+process.chdir(__dirname);
+
+let port = 3000;
+let host;
+let databaseConfig;
+// fly.io sets NODE_ENV to production automatically, otherwise it's unset when running locally
+if (process.env.NODE_ENV == "production") {
+	host = "0.0.0.0";
+	databaseConfig = { connectionString: process.env.DATABASE_URL };
+} else {
+	host = "localhost";
+	let { PGUSER, PGPASSWORD, PGDATABASE, PGHOST, PGPORT } = process.env;
+	databaseConfig = { PGUSER, PGPASSWORD, PGDATABASE, PGHOST, PGPORT };
+}
+
+let app = express();
+app.use(express.json());
+app.use(express.static("public"));
+
+// uncomment these to debug
+// console.log(JSON.stringify(process.env, null, 2));
+// console.log(JSON.stringify(databaseConfig, null, 2));
+
+let pool = new Pool(databaseConfig);
+pool.connect().then(() => {
+	console.log("Connected to db");
+});
+
+/*
+KEEP EVERYTHING ABOVE HERE
+REPLACE THE FOLLOWING WITH YOUR SERVER CODE 
+*/
+
+// const pg = require("pg");
+// const express = require("express");
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -9,33 +48,31 @@ let cookieParser = require("cookie-parser");
 let crypto = require("crypto");
 let cookie = require("cookie");
 
-const app = express();
 let server = http.createServer(app);
 let io = new Server(server);
 
 let currUser;     // for logged in user's data
 
 process.chdir(__dirname);
-const path = require("path");
+// const path = require("path");
 
-const port = 3000;
-const hostname = "localhost";
+// const hostname = "localhost";
 
-const env = require("../env.json");
-const { create } = require("domain");
-const { error } = require("console");
-const { console } = require("inspector");
-const Pool = pg.Pool;
-const pool = new Pool(env);
-
+// const env = require("../env.json");
+// const { create } = require("domain");
+// const { error } = require("console");
+// const { console } = require("inspector");
+// const Pool = pg.Pool;
+// const pool = new Pool(env);
 
 
-pool.connect().then(function () {
-  console.log(`Connected to database ${env.database}`);
-});
 
-app.use(express.static("public"));
-app.use(express.json());
+// pool.connect().then(function () {
+//   console.log(`Connected to database ${env.database}`);
+// });
+
+// app.use(express.static("public"));
+// app.use(express.json());
 app.use(cookieParser());
 
 
@@ -114,9 +151,10 @@ app.post("/register", async (req, res) => {
     console.log(error);
     return res.status(500);
   });
-  // TODO: change the result body (look into automatic logging in after sign up)
+  // DONE: change the result body (look into automatic logging in after sign up)
   return res.status(200).json();
 });
+
 
 app.post("/login", async (req, res) => {
   let body = req.body;
@@ -170,7 +208,7 @@ app.post("/login", async (req, res) => {
   }
 
   //DONE: if already logged in, do not generate another token before the earlier one expires
-  // and set an expiry for it
+  // and did not set an expiry for it
   let existingTokens;
   let token;
   try {
@@ -207,7 +245,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  return res.json({"url": "/my-page.html", "token": token});
+  return res.json({"url": "/my-page", "token": token, "username": username});
 });
 
 // app.get("/my-page/:user_id", (req, res) => {
@@ -272,9 +310,9 @@ app.get("/user", authorize, async (req, res) => {
   return res.status(200).json(userDetails)
 })
 
-// TODO: logout frontend in my-page
-// TODO: automatic user login after signup
-// TODO: put authorize middleware in other requests
+// DONE: logout frontend in my-page
+// DONE: automatic user login after signup
+// DOING: put authorize middleware in other requests
 
 app.post("/logout", (req, res) => {
   let { token } = req.cookies;
@@ -301,6 +339,11 @@ app.post("/logout", (req, res) => {
   return res.clearCookie("token", cookieOptions).json({"url": "/index.html"});
 
 })
+
+// app.get("/:username/my-page", authorize, (req, res) => {
+//   // return res.sendFile("public/my-page.html", { root: __dirname });
+//    return res.json({"url": "/my-page.html"});
+// })
 
 app.get("/notes", authorize, (req, res) => {
   pool.query(`SELECT * FROM notes WHERE creator_id = $1`, [currUser.user_id]).then(result => {
@@ -952,6 +995,11 @@ io.on("connection", async (socket) => {
   });
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Listening at: http://${hostname}:${port}`);
+
+/*
+KEEP EVERYTHING BELOW HERE
+*/
+
+server.listen(port, host, () => {
+	console.log(`http://${host}:${port}`);
 });
