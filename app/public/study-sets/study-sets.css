@@ -6,31 +6,6 @@ body, html {
     background-color: #A8BC72;
 }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #434B32;
-    color: #F1F7ED;
-    padding: 1rem;
-}
-
-.navbar button {
-    background-color: white;
-    color: #4CAF50;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-.navbar button:hover {
-    background-color: #45a049;
-    color: white;
-}
-
-
 .container {
     display: flex;
     height: calc(100vh - 64px);
