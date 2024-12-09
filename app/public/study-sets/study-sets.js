@@ -35,6 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    document.querySelector(".flashcard").addEventListener("click", function () {
+        this.classList.toggle("flipped");
+    });
+    
+
     document.getElementById("add-study-set").addEventListener("click", async () => {
         const title = prompt("Enter the name of the study set:");
         if (title) {
@@ -123,9 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         flashcardContainer.innerHTML = `
             <h2 id="study-set-title">${currentStudySetTitle}</h2>
-            <div id="flashcard">
-                ${card.front}
+            <div class="flashcard">
+                    <div class="front">${card.front}</div>
+                    <div class="back">${card.back}</div>
             </div>
+                
             <div class="controls">
                 <button id="prev-card" ${index === 0 ? "disabled" : ""}>Previous</button>
                 <button id="flip-card">Flip</button>
