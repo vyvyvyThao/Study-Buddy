@@ -1,37 +1,45 @@
 
-document.getElementById("uploadImageBtn").addEventListener("click", () => {
-    document.getElementById("imageUploader").click();
-});
+const backgrounds = [
+    "img/night_cafe.gif",
+    "img/fall.gif",
+    "img/rainy.gif",
+    "img/lofi_girl.gif",
+    "img/pixel_cafe.gif"
+];
 
-document.getElementById("uploadMusicBtn").addEventListener("click", () => {
+const audios = [
+    "audio/city.mp3",
+    "audio/cozy_upbeat.mp3",
+    "audio/rainy.mp3",
+    "audio/lofi.mp3",
+    "audio/cafe.mp3"
+];
+
+let currentRoomIndex = 0;
+
+document.getElementById("changeRoom").addEventListener("click", () => {
+    currentRoomIndex = (currentRoomIndex + 1) % backgrounds.length;
+    document.body.style.backgroundImage = `url(${backgrounds[currentRoomIndex]})`;
+
     const audio = document.getElementById("backgroundMusic");
-    // audio.src = url;
-    audio.hidden = false;
-    audio.play();
-    // document.getElementById("musicUploader").click();
+    audio.src = audios[currentRoomIndex];
+    audio.load();
+
+    // if (!audio.paused) {
+    //     audio.play();
+    // }
 });
 
-document.getElementById("imageUploader").addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            document.body.style.backgroundImage = `url(${e.target.result})`;
-        };
-        reader.readAsDataURL(file);
+document.getElementById("playAudio").addEventListener("click", () => {
+    const audio = document.getElementById("backgroundMusic");
+
+    if (audio.paused) {
+        audio.play();
+    } else {
+        audio.pause();
     }
 });
 
-// document.getElementById("musicUploader").addEventListener("change", function (event) {
-//     const file = event.target.files[0];
-//     if (file) {
-//         const url = URL.createObjectURL(file);
-//         const audio = document.getElementById("backgroundMusic");
-//         audio.src = url;
-//         audio.hidden = false;
-//         audio.play();
-//     }
-// });
 
 document.getElementById("toggle-sidebar").addEventListener("click", () => {
     sidebar.classList.toggle("active");
@@ -75,6 +83,9 @@ function stopTimer(button) {
     widget.dataset.timerInterval = '';
     widget.dataset.remainingTime = 0;
     updateTimerDisplay(widget);
+
+    const audio = new Audio('audio/alert.mp3');
+    audio.play();
 }
 
 function updateTimerDisplay(widget) {
@@ -344,28 +355,3 @@ function createWidget(type) {
 
     workspace.appendChild(widget);
 }
-
-
-let studySetsBtn = document.getElementById("studysets");
-let friendsBtn = document.getElementById("friends");
-let logoutBtn = document.getElementById("logout");
-
-studySetsBtn.addEventListener("click", () => {
-    window.location.href = "/study-sets";
-});
-
-friendsBtn.addEventListener("click", () => {
-    window.location.href = "/friends";
-});
-
-logoutBtn.addEventListener("click", () => {
-  fetch("/logout", {
-    method: "POST",
-    credentials: "include",
-  }).then((response) => {
-    return response.json();
-  }).then((body) => {
-    window.location.href = "/";
-    // window.location = body.url;
-  })
-});

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Page</title>
     <link rel="stylesheet" href="my-page.css">
+    <link rel="stylesheet" href="navbar.css">
 </head>
 <body>
     <header class="navbar">
@@ -12,6 +13,7 @@
 
         <div id="sidenav">
           <button id="toggle-sidebar">Widgets</button>
+          <button id="mypage">My Page</button>
           <button id="studysets">Study Sets</button>
           <button id="friends">Friends</button>
           <button id="logout">Logout</button>
@@ -23,10 +25,8 @@
           <button onclick="createWidget('timer')">Add Timer</button>
           <button onclick="createWidget('note')">Add Note</button>
           <button onclick="createWidget('task-list')">Add Task List</button>
-          <button id="uploadImageBtn">Upload Background</button>
-          <button id="uploadMusicBtn">Upload Music</button>
-          <input type="file" id="imageUploader" accept="image/*" hidden>
-          <input type="file" id="musicUploader" accept="audio/*" hidden>
+          <button id="changeRoom">Change Room</button>
+          <button id="playAudio">Toggle Audio</button>
       </aside>
 
       <main>
@@ -41,5 +41,6 @@
     </audio>
 
     <script src="my-page.js"></script>
+    <script src="navbar.js"></script>
 </body>
 </html>

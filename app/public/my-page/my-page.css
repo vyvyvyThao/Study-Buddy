@@ -11,7 +11,7 @@ body, html {
     background-repeat: no-repeat;
 }
 
-.navbar {
+/* .navbar {
     display: flex;
     justify-content: space-between;
     padding: 10px;
@@ -19,7 +19,7 @@ body, html {
     color: #F1F7ED;
     z-index: 1000;
     position: relative;
-}
+} */
 
 .sidebar {
     width: 250px;
@@ -27,7 +27,7 @@ body, html {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
-    background-color: rgba(65, 39, 34, 0.8);
+    background-color: rgba(65, 39, 34, 0.0);
     padding: 15px;
     color: white;
     position: absolute;
@@ -64,7 +64,7 @@ body, html {
 .widget {
     position: absolute;
     padding: 10px;
-    background-color: rgba(65, 39, 34, 0.8);
+    background-color: rgba(79, 119, 82, 0.5);
     color: #F1F7ED;
     border-radius: 5px;
     cursor: move;
@@ -97,7 +97,7 @@ body, html {
     text-decoration: line-through;
 }
 
-button {
+/* button {
     padding: 5px 18px;
     cursor: pointer;
     background-color: #445E0C;
@@ -108,11 +108,11 @@ button {
 
 button:hover {
     background-color: #3c4429;
-}
+} */
 
-#sidenav {
+/* #sidenav {
   display: flex;
-}
+} */
 
 #toggle-sidebar {
   padding: 15px;
