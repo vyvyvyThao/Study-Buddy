@@ -245,7 +245,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  return res.json({"url": "/my-page.html", "token": token, "username": username});
+  return res.json({"url": "/my-page", "token": token, "username": username});
 });
 
 // app.get("/my-page/:user_id", (req, res) => {
@@ -340,10 +340,10 @@ app.post("/logout", (req, res) => {
 
 })
 
-app.get("/:username/my-page", authorize, (req, res) => {
-  return res.sendFile("public/my-page.html", { root: __dirname });
-  // return res.json({"url": "/my-page.html"});
-})
+// app.get("/:username/my-page", authorize, (req, res) => {
+//   // return res.sendFile("public/my-page.html", { root: __dirname });
+//    return res.json({"url": "/my-page.html"});
+// })
 
 app.get("/notes", authorize, (req, res) => {
   pool.query(`SELECT * FROM notes WHERE creator_id = $1`, [currUser.user_id]).then(result => {

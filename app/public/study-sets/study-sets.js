@@ -236,12 +236,12 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchStudySets();
 });
 
-let studySetsBtn = document.getElementById("studysets");
+let mypageBtn = document.getElementById("mypage");
 let friendsBtn = document.getElementById("friends");
 let logoutBtn = document.getElementById("logout");
 
-studySetsBtn.addEventListener("click", () => {
-    window.location.href = "/study-sets";
+mypageBtn.addEventListener("click", () => {
+    window.location.href = "/my-page";
 });
 
 friendsBtn.addEventListener("click", () => {

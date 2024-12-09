@@ -255,3 +255,16 @@ socket.on('sent message', function ({message, sender_username}) {
     chatBox.appendChild(element);
     chatBox.scrollTo(0, chatBox.scrollHeight);
 });
+
+let logoutBtn = document.getElementById("logout");
+logoutBtn.addEventListener("click", () => {
+  fetch("/logout", {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => {
+    return response.json();
+  }).then((body) => {
+    window.location.href = "/";
+    // window.location = body.url;
+  })
+});
