@@ -4,7 +4,7 @@ let friendsBtn = document.getElementById("friends");
 let logoutBtn = document.getElementById("logout");
 
 myPageBtn.addEventListener("click", () => {
-    window.location.href = "/my-page.html";
+    window.location.href = "/my-page";
 })
 
 studySetsBtn.addEventListener("click", () => {
