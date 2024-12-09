@@ -4,18 +4,18 @@
 -- you'll need to add a DROP TABLE for every table you add
 -- we don't drop the database because that causes errors with fly
 
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS friendships;
-DROP TABLE IF EXISTS tasks;
-DROP TABLE IF EXISTS notes;
-DROP TABLE IF EXISTS study_sets;
-DROP TABLE IF EXISTS flashcards;
-DROP TABLE IF EXISTS group_sessions;
-DROP TABLE IF EXISTS group_memberships;
-DROP TABLE IF EXISTS login_tokens;
-DROP TABLE IF EXISTS chats;
-DROP TABLE IF EXISTS user_chat;
-DROP TABLE IF EXISTS chat_messages;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS friendships CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS notes CASCADE;
+DROP TABLE IF EXISTS study_sets CASCADE;
+DROP TABLE IF EXISTS flashcards CASCADE;
+DROP TABLE IF EXISTS group_sessions CASCADE;
+DROP TABLE IF EXISTS group_memberships CASCADE;
+DROP TABLE IF EXISTS login_tokens CASCADE;
+DROP TABLE IF EXISTS chats CASCADE;
+DROP TABLE IF EXISTS user_chat CASCADE;
+DROP TABLE IF EXISTS chat_messages CASCADE;
 
 CREATE TABLE users (
 	user_id SERIAL PRIMARY KEY,
