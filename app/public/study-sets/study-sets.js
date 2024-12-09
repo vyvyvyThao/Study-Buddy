@@ -39,6 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
         this.classList.toggle("flipped");
     });
     
+    function flip(){
+        this.classList.toggle("flipped");
+    }
 
     document.getElementById("add-study-set").addEventListener("click", async () => {
         const title = prompt("Enter the name of the study set:");
@@ -128,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         flashcardContainer.innerHTML = `
             <h2 id="study-set-title">${currentStudySetTitle}</h2>
-            <div class="flashcard">
+            <div class="flashcard" onClick="flip()">
                     <div class="front">${card.front}</div>
                     <div class="back">${card.back}</div>
             </div>
