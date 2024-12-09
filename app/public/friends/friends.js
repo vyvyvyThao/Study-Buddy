@@ -3,7 +3,7 @@ let chatHistory = {};
 let socket = io();
 let chatBox = document.getElementById("chat-box");
 let userDetails;
-let chats = loadChats;
+let chats = loadChats();
 
 function getChatId() {
     return window.location.pathname.split("/").pop();
@@ -215,6 +215,9 @@ function selectFriend(friend) {
         }).then((response) => {
             return response.json();
         }).then((body) => {
+            if (!chats[friend.friend_id]) {
+                chats[friend.friend_id] = {};
+            }
             chats[friend.friend_id].chat_id = body.chatId;
             history.pushState(".", "", `/friends/${body.chatId}`)
             socket.emit("join", {"chatId": body.chatId})
