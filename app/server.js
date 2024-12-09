@@ -379,7 +379,7 @@ app.post("/notes/add", authorize, (req, res) => {
   res.send();
 })
 
-app.get("/tasks", authorize, (req, res) => {
+app.get("my-page/tasks", authorize, (req, res) => {
   pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [currUser.user_id]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
@@ -390,7 +390,7 @@ app.get("/tasks", authorize, (req, res) => {
   });
 })
 
-app.post("/task/add", authorize, (req, res) => {
+app.post("my-page/task/add", authorize, (req, res) => {
   let body = req.body;
   if (
     !body.hasOwnProperty("title") ||
@@ -446,7 +446,7 @@ app.post("/task/add", authorize, (req, res) => {
   res.send();
 });
 
-app.patch("/task/update", authorize, (req, res) => {
+app.patch("my-page/task/update", authorize, (req, res) => {
   console.log("Updating task");
   let body = req.body;
 
