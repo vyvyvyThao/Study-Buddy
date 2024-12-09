@@ -11,16 +11,6 @@ body, html {
     background-repeat: no-repeat;
 }
 
-/* .navbar {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: #434B32;
-    color: #F1F7ED;
-    z-index: 1000;
-    position: relative;
-} */
-
 .sidebar {
     width: 250px;
     overflow-y: auto;
@@ -121,23 +111,3 @@ button:hover {
   align-self: center;
 }
 
-#studysets {
-  padding: 15px;
-  margin-left: 10px;
-  margin-right: 5px;
-  align-self: center;
-}
-
-#friends {
-  padding: 15px;
-  margin-left: 10px;
-  margin-right: 5px;
-  align-self: center;
-}
-
-#logout {
-  padding: 15px;
-  margin-left: 10px;
-  margin-right: 5px;
-  align-self: center;
-}

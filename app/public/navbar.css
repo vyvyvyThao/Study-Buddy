@@ -28,3 +28,31 @@ button:hover {
 body {
     font-family:'Courier New', Courier, monospace;
 }
+
+#mypage {
+    padding: 15px;
+    margin-left: 10px;
+    margin-right: 5px;
+    align-self: center;
+}
+
+#studysets {
+  padding: 15px;
+  margin-left: 10px;
+  margin-right: 5px;
+  align-self: center;
+}
+
+#friends {
+  padding: 15px;
+  margin-left: 10px;
+  margin-right: 5px;
+  align-self: center;
+}
+
+#logout {
+  padding: 15px;
+  margin-left: 10px;
+  margin-right: 5px;
+  align-self: center;
+}
