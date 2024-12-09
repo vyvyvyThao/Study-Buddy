@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (front && back) {
                 try {
-                    const response = await fetch("flashcards/add", {
+                    const response = await fetch("/flashcards/add", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const back = prompt("Edit the back of the flashcard:", card.back);
             if (front && back) {
                 try {
-                    const response = await fetch("flashcards/edit", {
+                    const response = await fetch("/flashcards/edit", {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = studyset[index];
             if (confirm("Are you sure you want to delete this flashcard?")) {
                 try {
-                    const response = await fetch("flashcards/delete", {
+                    const response = await fetch("/flashcards/delete", {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json",
