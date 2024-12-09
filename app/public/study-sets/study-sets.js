@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 
             <div class="controls">
                 <button id="prev-card" ${index === 0 ? "disabled" : ""}>Previous</button>
-                <button id="flip-card">Flip</button>
                 <button id="next-card" ${index === studyset.length - 1 ? "disabled" : ""}>Next</button>
             </div>
             <div class="edit-controls">
