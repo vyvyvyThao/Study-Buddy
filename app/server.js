@@ -151,9 +151,10 @@ app.post("/register", async (req, res) => {
     console.log(error);
     return res.status(500);
   });
-  // TODO: change the result body (look into automatic logging in after sign up)
+  // DONE: change the result body (look into automatic logging in after sign up)
   return res.status(200).json();
 });
+
 
 app.post("/login", async (req, res) => {
   let body = req.body;
@@ -207,7 +208,7 @@ app.post("/login", async (req, res) => {
   }
 
   //DONE: if already logged in, do not generate another token before the earlier one expires
-  // and set an expiry for it
+  // and did not set an expiry for it
   let existingTokens;
   let token;
   try {
@@ -244,7 +245,7 @@ app.post("/login", async (req, res) => {
   console.log("redirect");
   //res.sendFile("/public/my-page.html", {root: __dirname});
   //res.status(200).redirect("/my-page/" + user_id);
-  return res.json({"url": "/my-page.html", "token": token});
+  return res.json({"url": "/my-page.html", "token": token, "username": username});
 });
 
 // app.get("/my-page/:user_id", (req, res) => {
@@ -309,9 +310,9 @@ app.get("/user", authorize, async (req, res) => {
   return res.status(200).json(userDetails)
 })
 
-// TODO: logout frontend in my-page
-// TODO: automatic user login after signup
-// TODO: put authorize middleware in other requests
+// DONE: logout frontend in my-page
+// DONE: automatic user login after signup
+// DOING: put authorize middleware in other requests
 
 app.post("/logout", (req, res) => {
   let { token } = req.cookies;
@@ -337,6 +338,11 @@ app.post("/logout", (req, res) => {
 
   return res.clearCookie("token", cookieOptions).json({"url": "/index.html"});
 
+})
+
+app.get("/:username/my-page", authorize, (req, res) => {
+  return res.sendFile("public/my-page.html", { root: __dirname });
+  // return res.json({"url": "/my-page.html"});
 })
 
 app.get("/notes", authorize, (req, res) => {
