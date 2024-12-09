@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         flashcardContainer.innerHTML = `
             <h2 id="study-set-title">${currentStudySetTitle}</h2>
-            <div class="flashcard" onClick="flip(this)">
+            <div class="flashcard" onClick="(function(){this.classList.toggle("flipped");})()">
                     <div class="front">${card.front}</div>
                     <div class="back">${card.back}</div>
             </div>
