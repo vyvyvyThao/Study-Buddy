@@ -145,11 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        document.getElementById("flip-card").addEventListener("click", () => {
-            const flashcard = document.getElementById("flashcard");
-            flashcard.textContent = flashcard.textContent.trim() === card.front ? card.back : card.front;
-        });
-
         document.getElementById("prev-card").addEventListener("click", () => {
             if (index > 0) {
                 displayFlashcard(studyset, index - 1);
