@@ -994,6 +994,6 @@ io.on("connection", async (socket) => {
 KEEP EVERYTHING BELOW HERE
 */
 
-app.listen(port, host, () => {
+server.listen(port, host, () => {
 	console.log(`http://${host}:${port}`);
 });
