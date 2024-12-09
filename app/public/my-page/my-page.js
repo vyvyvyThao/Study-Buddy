@@ -1,18 +1,18 @@
 
 const backgrounds = [
-    "img/night_cafe.gif",
-    "img/fall.gif",
-    "img/rainy.gif",
-    "img/lofi_girl.gif",
-    "img/pixel_cafe.gif"
+    "../img/night_cafe.gif",
+    "../img/fall.gif",
+    "../img/rainy.gif",
+    "../img/lofi_girl.gif",
+    "../img/pixel_cafe.gif"
 ];
 
 const audios = [
-    "audio/city.mp3",
-    "audio/cozy_upbeat.mp3",
-    "audio/rainy.mp3",
-    "audio/lofi.mp3",
-    "audio/cafe.mp3"
+    "../audio/city.mp3",
+    "../audio/cozy_upbeat.mp3",
+    "../audio/rainy.mp3",
+    "../audio/lofi.mp3",
+    "../audio/cafe.mp3"
 ];
 
 let currentRoomIndex = 0;
@@ -84,7 +84,7 @@ function stopTimer(button) {
     widget.dataset.remainingTime = 0;
     updateTimerDisplay(widget);
 
-    const audio = new Audio('audio/alert.mp3');
+    const audio = new Audio('../audio/alert.mp3');
     audio.play();
 }
 
