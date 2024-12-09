@@ -191,15 +191,10 @@ function acceptFriendRequest(username) {
     populateFriendRequests();
 }
 
-function selectFriend(friend) {
+async function selectFriend(friend) {
     const chatBox = document.getElementById("chat-box");
     chatBox.innerHTML = `<h4>Chatting with ${friend.username}</h4>`;
-    // if (!chatHistory[friend]) chatHistory[friend] = [];
-    // chatHistory[friend].forEach(message => {
-    //     const p = document.createElement("p");
-    //     p.textContent = message;
-    //     chatBox.appendChild(p);
-    // });
+    chats = await loadChats();
     if (chats[friend.friend_id] && chats[friend.friend_id].chat_id) {
         history.pushState(".","", `/friends/${chats[friend.friend_id].chat_id}`)
         socket.emit("join", {"chatId": chats[friend.friend_id].chat_id})
