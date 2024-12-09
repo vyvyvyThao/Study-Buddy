@@ -712,7 +712,7 @@ app.get("/friends/:chatId", authorize, (req, res) => {
     return res.status(404).send();
   }
 
-  return res.sendFile("public/friends/friends.html", { root: __dirname });
+  return res.sendFile("public/friends/index.html", { root: __dirname });
 })
 
 app.get("/chat", authorize, async (req, res) => {
