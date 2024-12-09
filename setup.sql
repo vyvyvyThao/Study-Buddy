@@ -106,6 +106,8 @@ VALUES
 (2, 'test2', '$argon2id$v=19$m=65536,t=3,p=4$tRdux4KRbuFrE8zu2lg+Sg$tqXhH7197yHdNEemzSj2wDZC5V4EiAegAI7aItkeS5w', 'test2@gmail.com', '2024-11-12 18:57:25'),
 (3, 'test3', '$argon2id$v=19$m=65536,t=3,p=4$bOymKcC6kN8tyC88Eaq1Eg$e4/UlQAEPEsvxS0tNyrTx8bMBFY5UQkNbS5foO7lCVc', 'test3@gmail.com', '2024-11-12 18:57:25'),
 (4, 'test4', '$argon2id$v=19$m=65536,t=3,p=4$z/5wL/hh8waQoqp4p5wmHA$8R6NjOuFjz/X+E3jrnJ6Yxh0FriZfKC7v8mRZKg+QuY', 'test4@gmail.com', '2024-11-12 18:57:25');
+SELECT setval('users_id_seq',
+  (SELECT MAX(user_id) FROM users));
 
 INSERT INTO login_tokens (token, user_id) VALUES ('7b1e2b512344749b813f9322bf5ed4b55dce', 1);
 
