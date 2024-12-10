@@ -6,7 +6,9 @@ An application used for studying
 ### Pre-requirements
 - node.js installed  
 - postgreSQL installed
+- fly installed
+
 ### Commands
 `npm i` - install dependencies  
-`npm run setup` - setup database and tables  
-`npm run start` - start the node server  
+`npm run setup:local` - setup database and tables  
+`npm run start:local` - start the node server  
