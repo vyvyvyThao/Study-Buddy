@@ -83,13 +83,13 @@ async function populateFriendList() {
     } catch {}
     let chatId = getChatId();
 
-    chats = await chats;
+    chats = await loadChats();
     friends.forEach(friend => {
         const li = document.createElement("li");
         li.textContent = friend.username;
         li.onclick = () => selectFriend(friend);
         friendsList.appendChild(li);
-        if (chatId && chats[friend.friend_id] && chatId === chats[friend.friend_id].chat_id){
+        if (chatId && chats[friend.friend_id] && chatId === chats[friend.friend_id].chat_id.toString()){
             selectFriend(friend);
         }
     });
