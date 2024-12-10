@@ -1,7 +1,0 @@
-{
-    "user": "USERNAME",
-    "host": "localhost",
-    "database": "studybuddy",
-    "password": "PASSWORD",
-    "port": 5432
-}
