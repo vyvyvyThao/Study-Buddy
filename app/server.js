@@ -380,7 +380,7 @@ app.post("/notes/add", authorize, (req, res) => {
 })
 
 app.get("/my-page/tasks", authorize, (req, res) => {
-  pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [currUser.user_id]).then(result => {
+  pool.query(`SELECT * FROM tasks WHERE creator_id = $1`, [res.locals.userId]).then(result => {
     console.log(result.rows);
     res.json({rows: result.rows});
   })
@@ -403,7 +403,7 @@ app.post("/my-page/task/add", authorize, (req, res) => {
   let title = body.title;
   let due = body.due;
   let progress = body.progress;
-  let creatorId = currUser.user_id;
+  let creatorId = res.locals.userId;
 
   console.log("Read in: ", title, due);
 
