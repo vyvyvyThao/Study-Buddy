@@ -413,7 +413,7 @@ app.post("/my-page/task/add", authorize, (req, res) => {
 
   pool.query(`SELECT user_id, username FROM users WHERE user_id = $1`, [creatorId])
       .then(result => {
-        // console.log(result.rows);
+        console.log(result.rows);
         if (result.rows.length == 0) {
           creatorExist = false;
           res.status(400).json({error: 'user does not exist'});
